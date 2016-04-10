@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    
+    
+    <PreferenceCategory android:title="Lokale opslag">
+        <com.cbapps.kempengemeenten.LocationChooserDialog
+	        android:dialogTitle="@string/locatie" android:key="bestandslocatie" android:positiveButtonText="@string/opslaan" android:negativeButtonText="@string/cancel" android:title="@string/locatie" android:dialogLayout="@layout/choose_preference" />
+        <com.cbapps.kempengemeenten.UploadFromLocationChooserDialog
+	        android:dialogTitle="@string/locatie"
+	        android:key="bestandsmap"
+	        android:positiveButtonText="@string/opslaan"
+	        android:negativeButtonText="@string/cancel"
+	        android:title="@string/locatie"
+	        android:dialogLayout="@layout/choose_preference" />
+        
+    </PreferenceCategory>
+
+	<PreferenceCategory android:title="FTP server opslag">
+		<com.cbapps.kempengemeenten.FTPChooser
+			android:key="quickdownload"
+	        android:title="Download"/>
+        <com.cbapps.kempengemeenten.FTPChooser
+	        android:key="serverlocatie"
+	        android:title="Uploaden"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+	    android:title="Authenticatie">
+
+	    <EditTextPreference
+		    android:dialogTitle="@string/gebruiker"
+		    android:key="gebruikersnaam"
+		    android:positiveButtonText="@string/opslaan"
+		    android:negativeButtonText="@string/cancel"
+		    android:title="@string/gebruiker" />
+
+	    <EditTextPreference
+		    android:dialogTitle="@string/wachtwoord"
+		    android:key="wachtwoord"
+		    android:positiveButtonText="@string/opslaan"
+		    android:negativeButtonText="@string/cancel"
+		    android:title="@string/wachtwoord"
+		    android:inputType="textPassword" />
+    </PreferenceCategory>
+
+	<PreferenceCategory
+		android:title="Over">
+
+        <Preference
+	        android:title="@string/app_name"
+	        android:summary="@string/copyright"/>
+        <Preference
+			android:key="version_code"
+	        android:title="Build"
+	        android:summary="%s"/>
+    </PreferenceCategory>
+    
+</PreferenceScreen>
