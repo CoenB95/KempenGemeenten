@@ -16,10 +16,9 @@ package com.cbapps.kempengemeenten;
 
 import com.cbapps.kempengemeenten.BrowserAdapter.OnBrowserEventListener;
 import com.cb.kempengemeenten.R;
-import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.Animator.AnimatorListener;
-import com.nineoldandroids.animation.ObjectAnimator;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -161,31 +160,23 @@ public class FTPChooser extends DialogPreference {
 		private View fade_from;
 		private View fade_to;
 		
-		public void crossfade(View from, View to) {
-			fade_from = from;
-			fade_to = to;
-			ObjectAnimator a = ObjectAnimator.ofFloat(fade_from, "alpha", 1.0f, 0.0f);
-			ObjectAnimator b = ObjectAnimator.ofFloat(fade_to, "alpha", 0.0f, 1.0f);
-			a.addListener(new AnimatorListener() {
-				@Override public void onAnimationStart(Animator arg0) {}
-				@Override public void onAnimationRepeat(Animator arg0) {}
-				@Override public void onAnimationEnd(Animator arg0) {
-					fade_from.setVisibility(View.GONE);
-				}
-				@Override public void onAnimationCancel(Animator arg0) {}
-			});
-			b.addListener(new AnimatorListener() {
-				@Override public void onAnimationStart(Animator arg0) {
-					fade_to.setVisibility(View.VISIBLE);
-				}
-				@Override public void onAnimationRepeat(Animator arg0) {}
-				@Override public void onAnimationEnd(Animator arg0) {}
-				@Override public void onAnimationCancel(Animator arg0) {}
-			});
-			a.setDuration(500);
-			b.setDuration(500);
-			a.start();
-			b.start();
+		public void crossfade(final View from, View to) {
+			to.setAlpha(0f);
+			to.setVisibility(View.VISIBLE);
+			to.animate()
+					.alpha(1f)
+					.setDuration(500)
+					.setListener(null);
+
+			from.animate()
+					.alpha(0f)
+					.setDuration(500)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							from.setVisibility(View.GONE);
+						}
+					});
 		}
 		
 		@Override
