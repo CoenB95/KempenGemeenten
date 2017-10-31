@@ -8,6 +8,7 @@
 	    <item name="colorPrimary">#C2CE24</item>
 	    <item name="colorPrimaryDark">#A9B50B</item>
         <item name="colorAccent">#00646C</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
         <!--
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to

@@ -14,41 +14,15 @@
 
 package com.cbapps.kempengemeenten;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
+import android.support.v7.preference.PreferenceFragmentCompat;
 
 import com.cb.kempengemeenten.R;
 
-public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener{
+public class SettingsFragment extends PreferenceFragmentCompat {
 
-	@Override
-	public void onCreate(Bundle saved) {
-		super.onCreate(saved);
+    @Override
+    public void onCreatePreferences(Bundle bundle, String s) {
 		addPreferencesFromResource(R.xml.preferences);
-        String version = getString(R.string.version) + " " +
-                getPreferenceManager().getSharedPreferences().getString("version_code", "");
-        Preference preference = findPreference("version_code");
-        preference.setSummary(version);
 	}
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getPreferenceManager().getSharedPreferences()
-                .registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        getPreferenceManager().getSharedPreferences()
-                .unregisterOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-
-    }
 }

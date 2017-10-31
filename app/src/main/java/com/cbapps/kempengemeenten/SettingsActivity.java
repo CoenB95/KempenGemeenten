@@ -36,7 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
             a.setDisplayHomeAsUpEnabled(true);
             a.setHomeButtonEnabled(true);
         }
-        getFragmentManager().beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .replace(R.id.settings_frame, new SettingsFragment())
                 .commit();
     }

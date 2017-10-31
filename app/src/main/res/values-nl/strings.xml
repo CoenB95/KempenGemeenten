@@ -26,4 +26,5 @@
     <string name="intent_auto_start">Automatisch openen…</string>
     <string name="upload">Uploaden</string>
     <string name="download">Downloaden</string>
+    <string name="choose_directory">Kies een map</string>
 </resources>

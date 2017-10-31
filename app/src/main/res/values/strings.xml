@@ -28,5 +28,6 @@
     <string name="intent_auto_start">Auto opening…</string>
     <string name="upload">Upload</string>
     <string name="download">Download</string>
+    <string name="choose_directory">Choose a directory</string>
 
 </resources>
