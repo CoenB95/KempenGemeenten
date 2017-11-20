@@ -47,7 +47,7 @@ public class UploadFromLocationChooserDialog extends DialogPreference {
 			super.onSetInitialValue(restorePersistedValue, defaultValue);
 		}
 
-		@Override
+		/*@Override
 		protected void onBindDialogView(@NonNull View view) {
 			super.onBindDialogView(view);
 			text = (EditText) view.findViewById(R.id.editText1);
@@ -96,5 +96,5 @@ public class UploadFromLocationChooserDialog extends DialogPreference {
 					}
 				}
 			}
-		}
+		}*/
 	}
