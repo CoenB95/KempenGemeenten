@@ -1,6 +1,9 @@
 package com.cbapps.kempengemeenten.nextgen;
 
-import java.io.File;
+import com.cbapps.kempengemeenten.nextgen.callback.OnErrorListener;
+import com.cbapps.kempengemeenten.nextgen.callback.OnProgressUpdateListener;
+import com.cbapps.kempengemeenten.nextgen.callback.OnSuccessListener;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,83 +25,6 @@ public abstract class FileBrowser {
 	}
 
 	protected abstract boolean changeDirectory(String subDirName);
-
-	public void downloadFile(File outputFile, OnSuccessListener<Void> successListener,
-	                         OnProgressUpdateListener updateListener,
-	                         OnErrorListener errorListener) {
-		service.submit(() -> {
-			if (outputFile == null) {
-				if (errorListener != null)
-					errorListener.onError("Output file not specified.");
-				return;
-			}
-			if (currentFile.isDirectory()) {
-				if (errorListener != null)
-					errorListener.onError("Input 'file' is a directory. Did you mean to call downloadFiles() instead?");
-				return;
-			}
-
-			File correctedOutputFile = outputFile;
-			if (outputFile.isDirectory()) {
-				correctedOutputFile = new File(outputFile, currentFile.getName());
-			}
-
-			progressListener = updateListener;
-			if (downloadFile(currentFile.getPath(), correctedOutputFile)) {
-				if (successListener != null)
-					successListener.onSuccess(null);
-			} else {
-				if (errorListener != null)
-					errorListener.onError("Downloading file failed: " + getError());
-			}
-			progressListener = null;
-		});
-	}
-
-	protected abstract boolean downloadFile(String remoteFileName, File outputFile);
-
-	public void downloadFiles(File outputDirectory,
-	                          Predicate<FileInfo> predicate,
-	                          OnSuccessListener<Void> successListener,
-	                          OnProgressUpdateListener updateListener,
-	                          OnProgressUpdateListener globalUpdateListener,
-	                          OnErrorListener errorListener) {
-		service.submit(() -> {
-			if (!currentFile.isDirectory()) {
-				errorListener.onError("Input 'directory' is a file. Did you mean to call downloadFile() instead?");
-				return;
-			}
-			if (!outputDirectory.isDirectory()) {
-				errorListener.onError("Output 'directory' is a file. Did you mean to call downloadFile() instead?");
-				return;
-			}
-			List<FileInfo> files = listFiles(currentFile.getPath());
-			if (files == null) {
-				errorListener.onError("Error listing files to download: " + getError());
-			} else {
-				if (globalUpdateListener != null)
-					globalUpdateListener.onProgressUpdate(0);
-				for (int i = 0; i < files.size(); i++) {
-					FileInfo file = files.get(i);
-					if (predicate == null || predicate.test(file)) {
-						progressListener = updateListener;
-						File outputFile = new File(outputDirectory, file.getName());
-						if (!downloadFile(file.getPath(), outputFile)) {
-							if (errorListener != null)
-								errorListener.onError("Downloading files failed: " + getError());
-							progressListener = null;
-							return;
-						}
-						progressListener = null;
-					}
-					if (globalUpdateListener != null)
-						globalUpdateListener.onProgressUpdate((double) (i + 1) / files.size());
-				}
-				if (successListener != null)
-					successListener.onSuccess(null);
-			}
-		});
-	}
 
 	public FileInfo getCurrentFile() {
 		return currentFile;
@@ -143,27 +69,4 @@ public abstract class FileBrowser {
 		currentFile = value;
 	}
 
-	@FunctionalInterface
-	public interface OnErrorListener {
-		void onError(String errorMessage);
-	}
-
-	@FunctionalInterface
-	public interface OnProgressUpdateListener {
-		/**
-		 *
-		 * @param value the current progress, ranging from 0 to 1.
-		 */
-		void onProgressUpdate(double value);
-	}
-
-	@FunctionalInterface
-	public interface OnSuccessListener<T> {
-		void onSuccess(T result);
-	}
-
-	@FunctionalInterface
-	public interface Predicate<T> {
-		boolean test(T var1);
-	}
 }

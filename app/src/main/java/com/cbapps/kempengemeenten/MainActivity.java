@@ -2,7 +2,10 @@ package com.cbapps.kempengemeenten;
 
 import com.cbapps.kempengemeenten.BrowserAdapter.OnBrowserEventListener;
 import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.nextgen.DefaultFileInfo;
 import com.cbapps.kempengemeenten.nextgen.FTPFileBrowser;
+import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
+import com.cbapps.kempengemeenten.nextgen.FTPFileTransferer;
 import com.cbapps.kempengemeenten.nextgen.FileInfo;
 
 import android.Manifest;
@@ -76,9 +79,11 @@ public class MainActivity extends AppCompatActivity {
 
 	private void test() {
 		Log.i(TAG, "Testing...");
-		FTPFileBrowser fileBrowser = new FTPFileBrowser();
-		File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-		fileBrowser.moveIntoDirectory("/+Geodata/foto's gsms",///Handleiding.txt",
+		FTPFileConnection connection = new FTPFileConnection();
+		FTPFileBrowser fileBrowser = new FTPFileBrowser(connection);
+		FTPFileTransferer transferer = new FTPFileTransferer(connection);
+		FileInfo file = new DefaultFileInfo(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
+		fileBrowser.moveIntoDirectory("/+Geodata/foto's gsms",
 				result -> {
 					fileBrowser.listFiles(result1 -> {
 						StringBuilder builder = new StringBuilder("The following files are in the directory:");
@@ -87,21 +92,28 @@ public class MainActivity extends AppCompatActivity {
 									.append(" (").append(info.getSize()).append(" bytes)");
 						Log.d(TAG, builder.toString());
 
-						fileBrowser.downloadFiles(file, f -> {
+						transferer.downloadFiles(result1, file,
+								f -> {
 									if (f.getName().equals(".") || f.getName().equals("..")) {
-										Log.w(TAG, "Skip '" + f.getName() + "'.");
+										Log.w(TAG, "Skip '" + f.getName() + "'");
 										return false;
 									}
 									return true;
 								},
 								result2 -> {
 									Log.i(TAG, "Successfully downloaded files");
-								}, (progress) -> {
-									Log.i(TAG, String.format("Downloading '': %.1f%%", progress * 100));
-								}, (progress) -> {
-									Log.i(TAG, String.format("Overall progress: %.1f%%", progress * 100));
+								}, progress -> {
+									Log.d(TAG, String.format("Overall progress: %.1f%%", progress * 100));
 								}, error -> {
 									Log.e(TAG, "Error while downloading file: " + error);
+								}, result2 -> {
+									Log.i(TAG, String.format("Successfully downloaded '%s'", result2.getName()));
+								}, progress -> {
+									Log.d(TAG, String.format("Downloading '%s': %.1f%%",
+											transferer.getCurrentFile().getName(), progress * 100));
+								}, error -> {
+									Log.e(TAG, String.format("Error downloading '%s': %s",
+											transferer.getCurrentFile().getName(), error));
 								});
 					}, error -> Log.e(TAG, "Error while listing files: " + error));
 				}, error -> {

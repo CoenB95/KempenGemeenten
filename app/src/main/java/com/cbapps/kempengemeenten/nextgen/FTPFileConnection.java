@@ -55,7 +55,7 @@ public class FTPFileConnection {
 				Log.e(TAG, "Connection closed while logging in.");
 			}
 			return true;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Log.e(TAG, "Could not open connection: " + e.getMessage());
 			return false;
 		}

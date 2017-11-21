@@ -1,5 +1,12 @@
 package com.cbapps.kempengemeenten.nextgen;
 
+import android.util.Log;
+
+import com.cbapps.kempengemeenten.nextgen.callback.OnErrorListener;
+import com.cbapps.kempengemeenten.nextgen.callback.OnProgressUpdateListener;
+import com.cbapps.kempengemeenten.nextgen.callback.OnSuccessListener;
+import com.cbapps.kempengemeenten.nextgen.callback.Predicate;
+
 import org.apache.commons.net.io.CopyStreamAdapter;
 
 import java.io.File;
@@ -10,6 +17,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author CoenB95
@@ -20,27 +28,28 @@ public class FTPFileTransferer {
 
 	private ExecutorService service;
 	private FTPFileConnection connection;
+	private FileInfo currentFile;
 	private String error;
 
 	public FTPFileTransferer(FTPFileConnection connection) {
 		this.connection = connection;
-		service = Executors.newFixedThreadPool(1);
+		service = Executors.newFixedThreadPool(2);
 	}
 
-	public void downloadFile(FileInfo remoteFileInfo, FileInfo localFileInfo,
-	                         FileBrowser.OnSuccessListener<FileInfo> successListener,
-	                         FileBrowser.OnProgressUpdateListener updateListener,
-	                         FileBrowser.OnErrorListener errorListener) {
-		service.submit(() -> {
+	public Future<FileInfo> downloadFile(FileInfo remoteFileInfo, FileInfo localFileInfo,
+	                           OnSuccessListener<FileInfo> successListener,
+	                           OnProgressUpdateListener updateListener,
+	                           OnErrorListener errorListener) {
+		return service.submit(() -> {
 			if (remoteFileInfo == null || localFileInfo == null) {
 				if (errorListener != null)
 					errorListener.onError("Input and/or output file not specified.");
-				return;
+				return null;
 			}
 			if (remoteFileInfo.isDirectory()) {
 				if (errorListener != null)
 					errorListener.onError("Remote 'file' is a directory. Did you mean to call downloadFiles() instead?");
-				return;
+				return null;
 			}
 
 			File outputFile = new File(localFileInfo.getPath());
@@ -53,7 +62,7 @@ public class FTPFileTransferer {
 			if (!connection.checkConnection()) {
 				if (errorListener != null)
 					errorListener.onError("Could not connect to FTP server.");
-				return;
+				return null;
 			}
 
 			try {
@@ -74,59 +83,73 @@ public class FTPFileTransferer {
 
 				if (success) {
 					if (successListener != null)
-						successListener.onSuccess(null);
+						successListener.onSuccess(remoteFileInfo);
+					return remoteFileInfo;
 				} else {
 					if (errorListener != null)
 						errorListener.onError("Bad reply: " + connection.getClient().getReplyString());
+					return null;
 				}
 			} catch (FileNotFoundException e) {
 				if (errorListener != null)
 					errorListener.onError("Output-file not found");
+				return null;
 			} catch (IOException e) {
 				if (errorListener != null)
 					errorListener.onError("IOException");
+				return null;
 			} catch (Exception e) {
 				if (errorListener != null)
 					errorListener.onError("Uncaught exception: " + e.getMessage());
+				return null;
 			}
 		});
 	}
 
 	public void downloadFiles(List<FileInfo> remoteFileInfos, FileInfo localDirectoryInfo,
-	                          FileBrowser.Predicate<FileInfo> predicate,
-	                          FileBrowser.OnSuccessListener<Void> successListener,
-	                          FileBrowser.OnProgressUpdateListener progressListener,
-	                          FileBrowser.OnErrorListener errorListener,
-	                          FileBrowser.OnSuccessListener<FileInfo> fileSuccessListener,
-	                          FileBrowser.OnProgressUpdateListener fileProgressListener,
-	                          FileBrowser.OnErrorListener fileErrorListener) {
+	                          Predicate<FileInfo> predicate,
+	                          OnSuccessListener<Void> successListener,
+	                          OnProgressUpdateListener progressListener,
+	                          OnErrorListener errorListener,
+	                          OnSuccessListener<FileInfo> fileSuccessListener,
+	                          OnProgressUpdateListener fileProgressListener,
+	                          OnErrorListener fileErrorListener) {
 		service.submit(() -> {
-			if (remoteFileInfos == null || localDirectoryInfo == null) {
-				if (errorListener != null)
-					errorListener.onError("Input and/or output file(s) not specified.");
-				return;
-			}
-			if (!localDirectoryInfo.isDirectory()) {
-				errorListener.onError("Local 'directory' is a file. Did you mean to call downloadFile() instead?");
-				return;
-			}
+			try {
+				if (remoteFileInfos == null || localDirectoryInfo == null) {
+					if (errorListener != null)
+						errorListener.onError("Input and/or output file(s) not specified.");
+					return;
+				}
+				if (!localDirectoryInfo.isDirectory()) {
+					errorListener.onError("Local 'directory' is a file. Did you mean to call downloadFile() instead?");
+					return;
+				}
 
-			if (progressListener != null)
-				progressListener.onProgressUpdate(0);
-			int i = 0;
-			FileInfo file = remoteFileInfos.get(i);
+				if (progressListener != null)
+					progressListener.onProgressUpdate(0);
 
-			if (predicate == null || predicate.test(file)) {
-				downloadFile(file, localDirectoryInfo, result -> {
-					if (fileSuccessListener != null)
-						fileSuccessListener.onSuccess(file);
+				for (int i = 0; i < remoteFileInfos.size(); i++) {
+					currentFile = remoteFileInfos.get(i);
+
+					if (predicate == null || predicate.test(currentFile)) {
+						FileInfo inf = downloadFile(currentFile, localDirectoryInfo, fileSuccessListener,
+								fileProgressListener, fileErrorListener).get();
+					}
+
 					if (progressListener != null)
 						progressListener.onProgressUpdate((double) (i + 1) / remoteFileInfos.size());
-				}, fileProgressListener, fileErrorListener);
-			}
+				}
 
-			if (successListener != null)
-				successListener.onSuccess(null);
+				if (successListener != null)
+					successListener.onSuccess(null);
+			} catch (Exception e) {
+				Log.e(TAG, "Uncaught transfer exception: " + e.getMessage());
+			}
 		});
+	}
+
+	public FileInfo getCurrentFile() {
+		return currentFile;
 	}
 }
