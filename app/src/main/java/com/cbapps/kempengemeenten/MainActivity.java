@@ -96,9 +96,9 @@ public class MainActivity extends AppCompatActivity {
 								},
 								result2 -> {
 									Log.i(TAG, "Successfully downloaded files");
-								}, (fileInfo, progress) -> {
-									Log.i(TAG, String.format("Downloading '%s': %.1f%%", fileInfo.getName(), progress * 100));
-								}, (fileInfo, progress) -> {
+								}, (progress) -> {
+									Log.i(TAG, String.format("Downloading '': %.1f%%", progress * 100));
+								}, (progress) -> {
 									Log.i(TAG, String.format("Overall progress: %.1f%%", progress * 100));
 								}, error -> {
 									Log.e(TAG, "Error while downloading file: " + error);

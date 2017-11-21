@@ -77,7 +77,7 @@ public abstract class FileBrowser {
 				errorListener.onError("Error listing files to download: " + getError());
 			} else {
 				if (globalUpdateListener != null)
-					globalUpdateListener.onProgressUpdate(null,0);
+					globalUpdateListener.onProgressUpdate(0);
 				for (int i = 0; i < files.size(); i++) {
 					FileInfo file = files.get(i);
 					if (predicate == null || predicate.test(file)) {
@@ -92,7 +92,7 @@ public abstract class FileBrowser {
 						progressListener = null;
 					}
 					if (globalUpdateListener != null)
-						globalUpdateListener.onProgressUpdate(null, (double) (i + 1) / files.size());
+						globalUpdateListener.onProgressUpdate((double) (i + 1) / files.size());
 				}
 				if (successListener != null)
 					successListener.onSuccess(null);
@@ -154,7 +154,7 @@ public abstract class FileBrowser {
 		 *
 		 * @param value the current progress, ranging from 0 to 1.
 		 */
-		void onProgressUpdate(FileInfo file, double value);
+		void onProgressUpdate(double value);
 	}
 
 	@FunctionalInterface
