@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 		Log.i(TAG, "Testing...");
 		FTPFileBrowser fileBrowser = new FTPFileBrowser();
 		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "testtemp.jpg");
-		fileBrowser.downloadFiles("/+Geodata/foto's gsms/IMG_20170508_153519.jpg",
+		fileBrowser.downloadFile("/+Geodata/foto's gsms/IMG_20170508_153519.jpg",
 				file, s -> {
 					Log.i(TAG, "Succesfully downloaded image!");
 				}, progress -> {

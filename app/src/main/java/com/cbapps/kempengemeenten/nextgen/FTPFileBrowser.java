@@ -61,7 +61,7 @@ public class FTPFileBrowser extends FileBrowser {
 		}
 	}
 
-	public void downloadFiles(String remoteFileName, File outputFile,
+	public void downloadFile(String remoteFileName, File outputFile,
 	                          OnSuccessListener<Void> successListener,
 	                          final OnProgressUpdateListener updateListener,
 	                          OnErrorListener errorListener) {
