@@ -1,22 +1,19 @@
 package com.cbapps.kempengemeenten.nextgen;
 
-import android.content.Context;
 import android.util.Log;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
+import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.io.CopyStreamAdapter;
-import org.apache.commons.net.io.CopyStreamEvent;
-import org.apache.commons.net.io.Util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author CoenB95
@@ -27,22 +24,39 @@ public class FTPFileBrowser extends FileBrowser {
 	private static final String TAG = "FTPFileBrowser";
 
 	private FTPClient client;
-	private ExecutorService service;
+
 	private String hostName;
 	private String username;
 	private String password;
+	private String error;
 
 	public FTPFileBrowser() {
 		client = new FTPClient();
-		service = Executors.newCachedThreadPool();
 		hostName = "ftp.kempengemeenten.nl";
 		username = "Geo1";
 		password = "Ftpgeo1";
 	}
 
+	@Override
+	protected boolean changeDirectory(String subDirName) {
+		error = null;
+		if (!connect()) {
+			error = "Could not connect to FTP server.";
+			return false;
+		}
+		try {
+			FTPFile f = client.mlistFile(subDirName);
+			setCurrentFile(new FTPFileInfo(f));
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	private boolean connect() {
 		if (client.isConnected()) {
-			throw new IllegalStateException("Client is still connected. Should have been closed.");
+			return true;
 		}
 		try {
 			client.connect(hostName);
@@ -61,41 +75,68 @@ public class FTPFileBrowser extends FileBrowser {
 		}
 	}
 
-	public void downloadFile(String remoteFileName, File outputFile,
-	                          OnSuccessListener<Void> successListener,
-	                          final OnProgressUpdateListener updateListener,
-	                          OnErrorListener errorListener) {
-		service.submit(() -> {
-			if (!connect()) {
-				Log.e(TAG, "Download failed. Could not connect.");
-				if (errorListener != null) errorListener.onError();
-				return;
-			}
-			try {
-				if (updateListener != null) {
-					long fileSize = client.mlistFile(remoteFileName).getSize();
-					client.setCopyStreamListener(new CopyStreamAdapter() {
-						@Override
-						public void bytesTransferred(long totalBytesTransferred, int bytesTransferred, long streamSize) {
-							updateListener.onProgressUpdate((double)totalBytesTransferred / fileSize);
-						}
-					});
+	@Override
+	protected boolean downloadFile(String remoteFileName, File outputFile) {
+		error = null;
+		if (!connect()) {
+			error = "Could not connect to FTP server.";
+			return false;
+		}
+		try {
+			FileInfo info = new FTPFileInfo(client.mlistFile(remoteFileName));
+			long fileSize = info.getSize();
+			client.setCopyStreamListener(new CopyStreamAdapter() {
+				@Override
+				public void bytesTransferred(long totalBytesTransferred, int bytesTransferred, long streamSize) {
+					if (getProgressListener() != null)
+						getProgressListener().onProgressUpdate(info, (double) totalBytesTransferred / fileSize);
 				}
-				OutputStream outputStream = new FileOutputStream(outputFile);
-				if (client.retrieveFile(remoteFileName, outputStream)) {
-					Log.d(TAG, "Download success.");
-					if (successListener != null) successListener.onSuccess(null);
-				} else {
-					Log.e(TAG, "Download failed. Reply: " + client.getReplyString());
-					if (errorListener != null) errorListener.onError();
-				}
-				client.setCopyStreamListener(null);
-				outputStream.close();
-			} catch (FileNotFoundException e) {
-				Log.e(TAG, "Download failed: output-file not found.");
-			} catch (IOException e) {
-				Log.e(TAG, "Download failed: IOException.");
+			});
+
+			OutputStream outputStream = new FileOutputStream(outputFile);
+			boolean success = client.retrieveFile(remoteFileName, outputStream);
+			client.setCopyStreamListener(null);
+			outputStream.close();
+			if (success) {
+				Log.d(TAG, "Download success.");
+				return true;
+			} else {
+				error = "Bad reply: " + client.getReplyString();
+				return false;
 			}
-		});
+		} catch (FileNotFoundException e) {
+			error = "Output-file not found.";
+			return false;
+		} catch (Exception e) {
+			error = "IOException.";
+			return false;
+		}
+	}
+
+	@Override
+	protected String getError() {
+		return error;
+	}
+
+	@Override
+	protected List<FileInfo> listFiles(String remoteDirectoryName) {
+		if (!connect()) {
+			error = "Could not connect to FTP server.";
+			return null;
+		}
+		try {
+			FTPFile[] files = client.listFiles(remoteDirectoryName);
+			List<FileInfo> fileInfos = new ArrayList<>();
+			for (FTPFile file : files) {
+				fileInfos.add(new FTPFileInfo(remoteDirectoryName, file));
+			}
+			return fileInfos;
+		} catch (FTPConnectionClosedException e) {
+			error = "Connection closed.";
+			return null;
+		} catch (IOException e) {
+			error = "IOException.";
+			return null;
+		}
 	}
 }

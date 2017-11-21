@@ -3,6 +3,7 @@ package com.cbapps.kempengemeenten;
 import com.cbapps.kempengemeenten.BrowserAdapter.OnBrowserEventListener;
 import com.cb.kempengemeenten.R;
 import com.cbapps.kempengemeenten.nextgen.FTPFileBrowser;
+import com.cbapps.kempengemeenten.nextgen.FileInfo;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -76,14 +77,35 @@ public class MainActivity extends AppCompatActivity {
 	private void test() {
 		Log.i(TAG, "Testing...");
 		FTPFileBrowser fileBrowser = new FTPFileBrowser();
-		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "testtemp.jpg");
-		fileBrowser.downloadFile("/+Geodata/foto's gsms/IMG_20170508_153519.jpg",
-				file, s -> {
-					Log.i(TAG, "Succesfully downloaded image!");
-				}, progress -> {
-					Log.i(TAG, String.format("Image progress-update: %.1f%%", progress * 100));
-				}, () -> {
-					Log.e(TAG, "Downloading image failed.");
+		File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+		fileBrowser.moveIntoDirectory("/+Geodata/foto's gsms",///Handleiding.txt",
+				result -> {
+					fileBrowser.listFiles(result1 -> {
+						StringBuilder builder = new StringBuilder("The following files are in the directory:");
+						for (FileInfo info : result1)
+							builder.append('\n').append(info.getName())
+									.append(" (").append(info.getSize()).append(" bytes)");
+						Log.d(TAG, builder.toString());
+
+						fileBrowser.downloadFiles(file, f -> {
+									if (f.getName().equals(".") || f.getName().equals("..")) {
+										Log.w(TAG, "Skip '" + f.getName() + "'.");
+										return false;
+									}
+									return true;
+								},
+								result2 -> {
+									Log.i(TAG, "Successfully downloaded files");
+								}, (fileInfo, progress) -> {
+									Log.i(TAG, String.format("Downloading '%s': %.1f%%", fileInfo.getName(), progress * 100));
+								}, (fileInfo, progress) -> {
+									Log.i(TAG, String.format("Overall progress: %.1f%%", progress * 100));
+								}, error -> {
+									Log.e(TAG, "Error while downloading file: " + error);
+								});
+					}, error -> Log.e(TAG, "Error while listing files: " + error));
+				}, error -> {
+					Log.e(TAG, "Changing directory failed.");
 				});
 	}
 
