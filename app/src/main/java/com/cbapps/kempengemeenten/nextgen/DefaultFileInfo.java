@@ -1,5 +1,7 @@
 package com.cbapps.kempengemeenten.nextgen;
 
+import android.support.annotation.NonNull;
+
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.File;
@@ -33,5 +35,10 @@ public class DefaultFileInfo implements FileInfo {
 	@Override
 	public boolean isDirectory() {
 		return file.isDirectory();
+	}
+
+	@Override
+	public int compareTo(@NonNull FileInfo other) {
+		return getName().compareTo(other.getName());
 	}
 }

@@ -22,6 +22,8 @@ import java.util.List;
 public class FTPFileConnection {
 	private static final String TAG = "FTPFileConnection";
 
+	private static FTPFileConnection connection;
+
 	private FTPClient client;
 
 	private String hostName;
@@ -29,7 +31,7 @@ public class FTPFileConnection {
 	private String password;
 	private String error;
 
-	public FTPFileConnection() {
+	private FTPFileConnection() {
 		client = new FTPClient();
 		hostName = "ftp.kempengemeenten.nl";
 		username = "Geo1";
@@ -59,6 +61,12 @@ public class FTPFileConnection {
 			Log.e(TAG, "Could not open connection: " + e.getMessage());
 			return false;
 		}
+	}
+
+	public static FTPFileConnection getConnection() {
+		if (connection == null)
+			connection = new FTPFileConnection();
+		return connection;
 	}
 
 	public FTPClient getClient() {

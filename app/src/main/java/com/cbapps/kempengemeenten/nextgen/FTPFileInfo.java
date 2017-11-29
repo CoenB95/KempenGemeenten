@@ -1,5 +1,7 @@
 package com.cbapps.kempengemeenten.nextgen;
 
+import android.support.annotation.NonNull;
+
 import org.apache.commons.net.ftp.FTPFile;
 
 /**
@@ -47,5 +49,10 @@ public class FTPFileInfo implements FileInfo {
 				"path=" + getPath() +
 				", size=" + getSize() +
 				'}';
+	}
+
+	@Override
+	public int compareTo(@NonNull FileInfo other) {
+		return getName().compareTo(other.getName());
 	}
 }

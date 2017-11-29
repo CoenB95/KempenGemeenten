@@ -25,6 +25,7 @@ import com.cbapps.kempengemeenten.nextgen.FTPFileBrowser;
 import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
 import com.cbapps.kempengemeenten.nextgen.FTPFileTransferer;
 import com.cbapps.kempengemeenten.nextgen.FileInfo;
+import com.cbapps.kempengemeenten.nextgen.fragments.FileBrowserFragment;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,11 +57,16 @@ public class MainActivity extends AppCompatActivity {
 		downloadButton.setEnabled(false);
 		uploadButton.setEnabled(false);
 
+		uploadButton.setOnClickListener(view -> {
+			FileBrowserFragment browser = new FileBrowserFragment();
+			browser.browseFTP();
+			browser.show(getSupportFragmentManager(), "FileBrowser");
+		});
 		startFTP();
 	}
 
 	private void startFTP() {
-		connection = new FTPFileConnection();
+		connection = FTPFileConnection.getConnection();
 		fileBrowser = new FTPFileBrowser(connection);
 		transferer = new FTPFileTransferer(connection);
 		ExecutorService service = Executors.newCachedThreadPool();

@@ -75,10 +75,10 @@ public class FTPChooser extends DialogPreference {
 		@Override
 		protected void onBindDialogView(@NonNull View view) {
 			super.onBindDialogView(view);
-			text = (EditText) view.findViewById(R.id.editText1);
+			text = (EditText) view.findViewById(R.id.filePathEditText);
 			list = (ListView) view.findViewById(R.id.listView1);
 			list.setVisibility(View.GONE);
-			back = (ImageButton) view.findViewById(R.id.camera);
+			back = (ImageButton) view.findViewById(R.id.upButton);
 			wait = (ProgressBar) view.findViewById(R.id.progressBar1);
 			back.setOnClickListener(new View.OnClickListener() {
 				@Override
