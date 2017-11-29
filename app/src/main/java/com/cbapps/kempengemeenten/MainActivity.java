@@ -2,9 +2,7 @@ package com.cbapps.kempengemeenten;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +16,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import com.cb.kempengemeenten.R;
 import com.cbapps.kempengemeenten.nextgen.DefaultFileInfo;
@@ -26,52 +26,72 @@ import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
 import com.cbapps.kempengemeenten.nextgen.FTPFileTransferer;
 import com.cbapps.kempengemeenten.nextgen.FileInfo;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class MainActivity extends AppCompatActivity {
 
 	private static final int WRITE_PERMISSION_REQUEST_CODE = 101;
 	private static final String TAG = "MainActivity";
 
-	SharedPreferences sp;
-	BrowserAdapter br_adapter;
-	Context context;
+	private boolean awaitingDownloadPermission;
+
+	private FTPFileConnection connection;
+	private FTPFileBrowser fileBrowser;
+	private FTPFileTransferer transferer;
+
+	private Button downloadButton;
+	private Button uploadButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		context = this;
 		setContentView(R.layout.main_screen);
+
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
-		if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-				!= PackageManager.PERMISSION_GRANTED) {
+		downloadButton = findViewById(R.id.downloadButton);
+		uploadButton = findViewById(R.id.uploadButton);
+		downloadButton.setEnabled(false);
+		uploadButton.setEnabled(false);
 
-			// Should we show an explanation?
-			if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-					Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-
-				// Show an expanation to the user *asynchronously* -- don't block
-				// this thread waiting for the user's response! After the user
-				// sees the explanation, try again to request the permission.
-
-			} else {
-
-				// No explanation needed, we can request the permission.
-
-				ActivityCompat.requestPermissions(this,
-						new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-						WRITE_PERMISSION_REQUEST_CODE);
-			}
-		} else {
-			test();
-		}
+		startFTP();
 	}
 
-	private void test() {
-		Log.i(TAG, "Testing...");
-		FTPFileConnection connection = new FTPFileConnection();
-		FTPFileBrowser fileBrowser = new FTPFileBrowser(connection);
-		FTPFileTransferer transferer = new FTPFileTransferer(connection);
+	private void startFTP() {
+		connection = new FTPFileConnection();
+		fileBrowser = new FTPFileBrowser(connection);
+		transferer = new FTPFileTransferer(connection);
+		ExecutorService service = Executors.newCachedThreadPool();
+		service.submit(() -> {
+			if (connection.checkConnection()) {
+				runOnUiThread(() -> {
+					downloadButton.setEnabled(true);
+					uploadButton.setEnabled(true);
+				});
+			}
+		});
+		service.shutdown();
+	}
+
+	public void onDownloadButtonClicked(View view) {
+		downloadFiles();
+	}
+
+	private void downloadFiles() {
+		awaitingDownloadPermission = false;
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+				!= PackageManager.PERMISSION_GRANTED) {
+			Log.w(TAG, "Write permission not yet granted.");
+			ActivityCompat.requestPermissions(this,
+					new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+					WRITE_PERMISSION_REQUEST_CODE);
+			awaitingDownloadPermission = true;
+			return;
+		}
+
+		Log.i(TAG, "Downloading files...");
 		FileInfo file = new DefaultFileInfo(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
 		fileBrowser.moveIntoDirectory("/+Geodata/foto's gsms",
 				result -> {
@@ -84,26 +104,19 @@ public class MainActivity extends AppCompatActivity {
 
 						transferer.downloadFiles(result1, file,
 								f -> {
-									if (f.getName().equals(".") || f.getName().equals("..")) {
-										Log.w(TAG, "Skip '" + f.getName() + "'");
+									if (f.getName().startsWith(".")) {
+										Log.w(TAG, "Skiping '" + f.getName() + "'");
 										return false;
 									}
 									return true;
-//								},
-//								result2 -> {
-//									Log.i(TAG, "Successfully downloaded files");
-//								}, progress -> {
-//									Log.d(TAG, String.format("Overall progress: %.1f%%", progress * 100));
-//								}, error -> {
-//									Log.e(TAG, "Error while downloading file: " + error);
 								}, info -> {
 									Log.i(TAG, String.format("Successfully downloaded '%s'", info.getName()));
 								}, (info, progress) -> {
 									Log.d(TAG, String.format("Downloading '%s': %.1f%%",
-											info, progress * 100));
+											info.getName(), progress * 100));
 								}, (info, error) -> {
 									Log.e(TAG, String.format("Error downloading '%s': %s",
-											info, error));
+											info.getName(), error));
 								});
 					}, (info, error) -> Log.e(TAG, "Error while listing files: " + error));
 				}, (info, error) -> {
@@ -145,7 +158,8 @@ public class MainActivity extends AppCompatActivity {
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 		switch (requestCode) {
 			case WRITE_PERMISSION_REQUEST_CODE:
-				test();
+				if (awaitingDownloadPermission)
+					downloadFiles();
 				break;
 			default:
 				super.onRequestPermissionsResult(requestCode, permissions, grantResults);
