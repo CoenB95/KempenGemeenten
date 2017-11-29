@@ -114,10 +114,10 @@ public class FileBrowserFragment extends DialogFragment {
 		progressCircle.animate().alpha(1).setListener(null).start();
 		progressCircle.setVisibility(View.VISIBLE);
 		browser.moveIntoDirectory(path == null || path.isEmpty() ? "/" : path, result -> {
-			Log.i(TAG, "Moved into '" + result.getName() + "'");
+			Log.i(TAG, "Moved into '" + result.getPath() + "'");
 			handler.post(() -> {
-				this.path = result.getName();
-				filePathEditText.setText(result.getName());
+				this.path = result.getPath();
+				filePathEditText.setText(result.getPath());
 			});
 			browser.listFiles(result2 -> {
 				Log.i(TAG, "Done fetching files.");

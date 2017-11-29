@@ -33,7 +33,7 @@ public class FTPFileBrowser extends FileBrowser {
 		}
 		try {
 			FTPFile f = connection.getClient().mlistFile(subDirName);
-			setCurrentFile(new FTPFileInfo(f));
+			setCurrentFile(new FTPFileInfo(f).withPathAndName(subDirName));
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -56,7 +56,7 @@ public class FTPFileBrowser extends FileBrowser {
 			FTPFile[] files = connection.getClient().listFiles(remoteDirectoryName);
 			List<FileInfo> fileInfos = new ArrayList<>();
 			for (FTPFile file : files) {
-				fileInfos.add(new FTPFileInfo(remoteDirectoryName, file));
+				fileInfos.add(new FTPFileInfo(file).withPath(remoteDirectoryName));
 			}
 			return fileInfos;
 		} catch (FTPConnectionClosedException e) {

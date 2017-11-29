@@ -15,9 +15,18 @@ public class FTPFileInfo implements FileInfo {
 		this.file = file;
 	}
 
-	public FTPFileInfo(String baseDir, FTPFile file) {
-		this.file = file;
-		this.file.setName(baseDir + '/' + file.getName());
+	public FTPFileInfo withPath(String baseDir) {
+		FTPFileInfo info = new FTPFileInfo(file);
+		if (baseDir != null && !baseDir.isEmpty())
+			info.file.setName(baseDir + '/' + file.getName());
+		return info;
+	}
+
+	public FTPFileInfo withPathAndName(String baseDir) {
+		FTPFileInfo info = new FTPFileInfo(file);
+		if (baseDir != null && !baseDir.isEmpty())
+			info.file.setName(baseDir);
+		return info;
 	}
 
 	@Override
