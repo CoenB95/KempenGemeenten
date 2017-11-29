@@ -13,7 +13,7 @@
         android:id="@+id/listView1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/upButton" >
+        android:layout_below="@+id/backButton" >
 
     </ListView>
 
@@ -21,8 +21,8 @@
         android:id="@+id/filePathEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/upButton"
-        android:layout_toEndOf="@+id/upButton"
+        android:layout_toRightOf="@+id/backButton"
+        android:layout_toEndOf="@+id/backButton"
         android:ems="10"
         android:hint="@string/locatie"
         android:inputType="text" >
@@ -31,7 +31,7 @@
     </EditText>
 
     <ImageButton
-        android:id="@+id/upButton"
+        android:id="@+id/backButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"

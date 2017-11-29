@@ -78,7 +78,7 @@ public class FTPChooser extends DialogPreference {
 			text = (EditText) view.findViewById(R.id.filePathEditText);
 			list = (ListView) view.findViewById(R.id.listView1);
 			list.setVisibility(View.GONE);
-			back = (ImageButton) view.findViewById(R.id.upButton);
+			back = (ImageButton) view.findViewById(R.id.backButton);
 			wait = (ProgressBar) view.findViewById(R.id.progressBar1);
 			back.setOnClickListener(new View.OnClickListener() {
 				@Override

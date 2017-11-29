@@ -20,6 +20,7 @@ import java.util.List;
 public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.FileViewHolder> {
 
 	private List<FileInfo> fileInfos;
+	private OnFileSelectedListener listener;
 
 	public FileBrowserAdapter() {
 		fileInfos = new ArrayList<>();
@@ -35,6 +36,10 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 		fileInfos.addAll(infos);
 		Collections.sort(fileInfos);
 		notifyDataSetChanged();
+	}
+
+	public void setListener(OnFileSelectedListener listener) {
+		this.listener = listener;
 	}
 
 	@Override
@@ -61,6 +66,10 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 		public FileViewHolder(View itemView) {
 			super(itemView);
 			fileNameTextView = itemView.findViewById(R.id.fileNameTextView);
+			itemView.setOnClickListener(view -> {
+				if (listener != null)
+					listener.onFileSelected(info);
+			});
 		}
 
 		public void setFile(FileInfo info) {

@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -39,6 +40,7 @@ public class FileBrowserFragment extends DialogFragment {
 	private FileBrowserAdapter fileBrowserAdapter;
 	private RecyclerView fileBrowserRecyclerView;
 	private ProgressBar progressCircle;
+	private ImageButton backButton;
 	private TextView filePathEditText;
 	private Handler handler;
 	private int mode;
@@ -55,7 +57,17 @@ public class FileBrowserFragment extends DialogFragment {
 		progressCircle.setVisibility(View.GONE);
 		filePathEditText = view.findViewById(R.id.filePathEditText);
 
+		backButton = view.findViewById(R.id.backButton);
+		backButton.setOnClickListener(view1 -> {
+			int index = path.lastIndexOf('/');
+			moveAndList(index > 0 ? path.substring(0, index) : "");
+		});
+
 		fileBrowserAdapter = new FileBrowserAdapter();
+		fileBrowserAdapter.setListener(info -> {
+			moveAndList(info.getPath());
+		});
+
 		fileBrowserRecyclerView = view.findViewById(R.id.fileRecyclerView);
 		fileBrowserRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 		fileBrowserRecyclerView.setAdapter(fileBrowserAdapter);
@@ -99,7 +111,7 @@ public class FileBrowserFragment extends DialogFragment {
 	private void moveAndList(String path) {
 		Log.i(TAG, "Listing files...");
 		fileBrowserRecyclerView.animate().alpha(0).start();
-		progressCircle.animate().alpha(1).start();
+		progressCircle.animate().alpha(1).setListener(null).start();
 		progressCircle.setVisibility(View.VISIBLE);
 		browser.moveIntoDirectory(path == null || path.isEmpty() ? "/" : path, result -> {
 			Log.i(TAG, "Moved into '" + result.getName() + "'");
