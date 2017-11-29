@@ -1,24 +1,15 @@
 package com.cbapps.kempengemeenten;
 
-import com.cbapps.kempengemeenten.BrowserAdapter.OnBrowserEventListener;
-import com.cb.kempengemeenten.R;
-import com.cbapps.kempengemeenten.nextgen.DefaultFileInfo;
-import com.cbapps.kempengemeenten.nextgen.FTPFileBrowser;
-import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
-import com.cbapps.kempengemeenten.nextgen.FTPFileTransferer;
-import com.cbapps.kempengemeenten.nextgen.FileInfo;
-
 import android.Manifest;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -27,14 +18,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import java.io.File;
+import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.nextgen.DefaultFileInfo;
+import com.cbapps.kempengemeenten.nextgen.FTPFileBrowser;
+import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
+import com.cbapps.kempengemeenten.nextgen.FTPFileTransferer;
+import com.cbapps.kempengemeenten.nextgen.FileInfo;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -99,24 +89,24 @@ public class MainActivity extends AppCompatActivity {
 										return false;
 									}
 									return true;
-								},
-								result2 -> {
-									Log.i(TAG, "Successfully downloaded files");
-								}, progress -> {
-									Log.d(TAG, String.format("Overall progress: %.1f%%", progress * 100));
-								}, error -> {
-									Log.e(TAG, "Error while downloading file: " + error);
-								}, result2 -> {
-									Log.i(TAG, String.format("Successfully downloaded '%s'", result2.getName()));
-								}, progress -> {
+//								},
+//								result2 -> {
+//									Log.i(TAG, "Successfully downloaded files");
+//								}, progress -> {
+//									Log.d(TAG, String.format("Overall progress: %.1f%%", progress * 100));
+//								}, error -> {
+//									Log.e(TAG, "Error while downloading file: " + error);
+								}, info -> {
+									Log.i(TAG, String.format("Successfully downloaded '%s'", info.getName()));
+								}, (info, progress) -> {
 									Log.d(TAG, String.format("Downloading '%s': %.1f%%",
-											transferer.getCurrentFile().getName(), progress * 100));
-								}, error -> {
+											info, progress * 100));
+								}, (info, error) -> {
 									Log.e(TAG, String.format("Error downloading '%s': %s",
-											transferer.getCurrentFile().getName(), error));
+											info, error));
 								});
-					}, error -> Log.e(TAG, "Error while listing files: " + error));
-				}, error -> {
+					}, (info, error) -> Log.e(TAG, "Error while listing files: " + error));
+				}, (info, error) -> {
 					Log.e(TAG, "Changing directory failed.");
 				});
 	}

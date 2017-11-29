@@ -7,6 +7,7 @@ import com.cbapps.kempengemeenten.nextgen.callback.OnProgressUpdateListener;
 import com.cbapps.kempengemeenten.nextgen.callback.OnSuccessListener;
 import com.cbapps.kempengemeenten.nextgen.callback.Predicate;
 
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.io.CopyStreamAdapter;
 
 import java.io.File;
@@ -38,7 +39,7 @@ public class FTPFileTransferer {
 
 	public Future<FileInfo> downloadFile(FileInfo remoteFileInfo, FileInfo localFileInfo,
 	                           OnSuccessListener<FileInfo> successListener,
-	                           OnProgressUpdateListener updateListener,
+	                           OnProgressUpdateListener<FileInfo> updateListener,
 	                           OnErrorListener errorListener) {
 		return service.submit(() -> {
 			if (remoteFileInfo == null || localFileInfo == null) {
@@ -67,11 +68,12 @@ public class FTPFileTransferer {
 
 			try {
 				long fileSize = remoteFileInfo.getSize();
+				connection.getClient().setFileType(FTP.BINARY_FILE_TYPE);
 				connection.getClient().setCopyStreamListener(new CopyStreamAdapter() {
 					@Override
 					public void bytesTransferred(long totalBytesTransferred, int bytesTransferred, long streamSize) {
 						if (updateListener != null)
-							updateListener.onProgressUpdate((double) totalBytesTransferred / fileSize);
+							updateListener.onProgressUpdate(remoteFileInfo, (double) totalBytesTransferred / fileSize);
 					}
 				});
 
@@ -79,6 +81,7 @@ public class FTPFileTransferer {
 				boolean success = connection.getClient().retrieveFile(remoteFileInfo.getPath(), outputStream);
 
 				connection.getClient().setCopyStreamListener(null);
+				outputStream.flush();
 				outputStream.close();
 
 				if (success) {
@@ -108,12 +111,9 @@ public class FTPFileTransferer {
 
 	public void downloadFiles(List<FileInfo> remoteFileInfos, FileInfo localDirectoryInfo,
 	                          Predicate<FileInfo> predicate,
-	                          OnSuccessListener<Void> successListener,
-	                          OnProgressUpdateListener progressListener,
-	                          OnErrorListener errorListener,
 	                          OnSuccessListener<FileInfo> fileSuccessListener,
-	                          OnProgressUpdateListener fileProgressListener,
-	                          OnErrorListener fileErrorListener) {
+	                          OnProgressUpdateListener<FileInfo> fileProgressListener,
+	                          OnErrorListener<FileInfo> errorListener) {
 		service.submit(() -> {
 			try {
 				if (remoteFileInfos == null || localDirectoryInfo == null) {
@@ -126,23 +126,14 @@ public class FTPFileTransferer {
 					return;
 				}
 
-				if (progressListener != null)
-					progressListener.onProgressUpdate(0);
-
 				for (int i = 0; i < remoteFileInfos.size(); i++) {
 					currentFile = remoteFileInfos.get(i);
 
 					if (predicate == null || predicate.test(currentFile)) {
 						FileInfo inf = downloadFile(currentFile, localDirectoryInfo, fileSuccessListener,
-								fileProgressListener, fileErrorListener).get();
+								fileProgressListener, errorListener).get();
 					}
-
-					if (progressListener != null)
-						progressListener.onProgressUpdate((double) (i + 1) / remoteFileInfos.size());
 				}
-
-				if (successListener != null)
-					successListener.onSuccess(null);
 			} catch (Exception e) {
 				Log.e(TAG, "Uncaught transfer exception: " + e.getMessage());
 			}
