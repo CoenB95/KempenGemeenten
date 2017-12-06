@@ -6,7 +6,12 @@
     
     <PreferenceCategory android:title="Lokale opslag">
         <com.cbapps.kempengemeenten.LocationChooserDialog
-	        android:dialogTitle="@string/locatie" android:key="bestandslocatie" android:positiveButtonText="@string/opslaan" android:negativeButtonText="@string/cancel" android:title="@string/locatie" android:dialogLayout="@layout/choose_preference" />
+	        android:dialogTitle="@string/locatie"
+			android:key="bestandslocatie"
+			android:positiveButtonText="@string/opslaan"
+			android:negativeButtonText="@string/cancel"
+			android:title="@string/locatie"
+			android:dialogLayout="@layout/choose_preference" />
         <com.cbapps.kempengemeenten.UploadFromLocationChooserDialog
 	        android:dialogTitle="@string/locatie"
 	        android:key="bestandsmap"
@@ -17,14 +22,7 @@
         
     </PreferenceCategory>
 
-	<PreferenceCategory android:title="FTP server opslag">
-		<com.cbapps.kempengemeenten.FTPChooser
-			android:key="quickdownload"
-	        android:title="Download"/>
-        <com.cbapps.kempengemeenten.FTPChooser
-	        android:key="serverlocatie"
-	        android:title="Uploaden"/>
-    </PreferenceCategory>
+
 
     <PreferenceCategory
 	    android:title="Authenticatie">

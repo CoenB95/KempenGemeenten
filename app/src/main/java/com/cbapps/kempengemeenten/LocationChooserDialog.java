@@ -21,11 +21,6 @@ public class LocationChooserDialog extends DialogPreference {
 
 	public LocationChooserDialog(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		setTitle(R.string.download);
-		setSummary(R.string.choose_directory);
-		setDialogLayoutResource(R.layout.choose_preference);
-		setPositiveButtonText(android.R.string.ok);
-		setNegativeButtonText(android.R.string.cancel);
-		setDialogIcon(null);
+		setDialogLayoutResource(R.layout.file_browser_layout);
 	}
 }

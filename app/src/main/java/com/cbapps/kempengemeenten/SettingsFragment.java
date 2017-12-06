@@ -15,14 +15,49 @@
 package com.cbapps.kempengemeenten;
 
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 
 import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.nextgen.fragments.FileBrowserFragment;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
+
+	private static final String DIALOG_FRAGMENT_TAG = "SettingsFragment.DIALOG";
+
+	private DialogFragment onCreatePreferenceDialogFragment(Preference preference) {
+		if (preference instanceof LocationChooserDialog) {
+			FileBrowserFragment browserFragment = new FileBrowserFragment();
+			browserFragment.browseFTP();
+			return browserFragment;
+		}
+		return null;
+	}
 
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {
 		addPreferencesFromResource(R.xml.preferences);
+	}
+
+	@Override
+	public void onDisplayPreferenceDialog(Preference preference) {
+		if (getFragmentManager() == null)
+			return;
+
+		// Check if dialog is already showing
+		if (getFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG) != null)
+			return;
+
+		DialogFragment fragment;
+		// Check for custom dialogs
+		if ((fragment = onCreatePreferenceDialogFragment(preference)) == null) {
+			// No custom dialog for this preference, use default inflation.
+			super.onDisplayPreferenceDialog(preference);
+			return;
+		}
+
+		fragment.setTargetFragment(this, 0);
+		fragment.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
 	}
 }
