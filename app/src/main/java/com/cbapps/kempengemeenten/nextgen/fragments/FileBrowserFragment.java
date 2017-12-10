@@ -40,7 +40,6 @@ public class FileBrowserFragment extends DialogFragment {
 	private FileBrowserAdapter fileBrowserAdapter;
 	private RecyclerView fileBrowserRecyclerView;
 	private ProgressBar progressCircle;
-	private ImageButton backButton;
 	private TextView filePathEditText;
 	private Handler handler;
 	private int mode;
@@ -57,16 +56,14 @@ public class FileBrowserFragment extends DialogFragment {
 		progressCircle.setVisibility(View.GONE);
 		filePathEditText = view.findViewById(R.id.filePathEditText);
 
-		backButton = view.findViewById(R.id.backButton);
+		ImageButton backButton = view.findViewById(R.id.backButton);
 		backButton.setOnClickListener(view1 -> {
 			int index = path.lastIndexOf('/');
 			moveAndList(index > 0 ? path.substring(0, index) : "");
 		});
 
 		fileBrowserAdapter = new FileBrowserAdapter();
-		fileBrowserAdapter.setListener(info -> {
-			moveAndList(info.getPath());
-		});
+		fileBrowserAdapter.setListener(info -> moveAndList(info.getPath()));
 
 		fileBrowserRecyclerView = view.findViewById(R.id.fileRecyclerView);
 		fileBrowserRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
