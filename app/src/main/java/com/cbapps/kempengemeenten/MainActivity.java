@@ -4,13 +4,18 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PersistableBundle;
 import android.preference.PreferenceActivity;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -43,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private Button downloadButton;
 	private Button uploadButton;
+	ActionBarDrawerToggle drawerToggle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +57,15 @@ public class MainActivity extends AppCompatActivity {
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+
+		DrawerLayout drawerLayout = findViewById(R.id.drawer);
+		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
+				R.string.drawer_open, R.string.drawer_close);
+		drawerLayout.addDrawerListener(drawerToggle);
+
+		if (getSupportActionBar() == null)
+			throw new IllegalStateException("We can not have no action bar!");
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		downloadButton = findViewById(R.id.downloadButton);
 		uploadButton = findViewById(R.id.uploadButton);
@@ -63,6 +78,18 @@ public class MainActivity extends AppCompatActivity {
 			browser.show(getSupportFragmentManager(), "FileBrowser");
 		});
 		startFTP();
+	}
+
+	@Override
+	protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		drawerToggle.syncState();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		drawerToggle.onConfigurationChanged(newConfig);
 	}
 
 	private void startFTP() {
@@ -144,6 +171,9 @@ public class MainActivity extends AppCompatActivity {
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		if (drawerToggle.onOptionsItemSelected(item))
+			return true;
+
 		switch (item.getItemId()) {
 			case R.id.action_settings:
 				Intent intent = new Intent(getBaseContext(), SettingsActivity.class);

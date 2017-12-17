@@ -27,4 +27,7 @@
     <string name="upload">Uploaden</string>
     <string name="download">Downloaden</string>
     <string name="choose_directory">Kies een map</string>
+    <string name="home">Start</string>
+    <string name="drawer_open">Open drawer</string>
+    <string name="drawer_close">Sluit drawer</string>
 </resources>

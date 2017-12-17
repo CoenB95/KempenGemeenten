@@ -30,5 +30,7 @@
     <string name="download">Download</string>
     <string name="choose_directory">Choose a directory</string>
     <string name="home">Home</string>
+    <string name="drawer_open">Open drawer</string>
+    <string name="drawer_close">Close drawer</string>
 
 </resources>
