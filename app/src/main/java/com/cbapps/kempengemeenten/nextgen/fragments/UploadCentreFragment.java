@@ -96,7 +96,6 @@ public class UploadCentreFragment extends DialogFragment {
 					Log.d(TAG, "Storage writing permission yet undecided.");
 			}
 		}, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-		downloadFiles();
 	}
 
 	@Override
@@ -131,22 +130,24 @@ public class UploadCentreFragment extends DialogFragment {
 							.append(" (").append(info.getSize()).append(" bytes)");
 				Log.d(TAG, builder.toString());
 
-				transferer.downloadFiles(result1, file,
-						f -> {
-							if (f.getName().startsWith(".")) {
-								Log.w(TAG, "Skiping '" + f.getName() + "'");
-								return false;
-							}
-							return true;
-						}, info -> {
-							Log.i(TAG, String.format("Successfully downloaded '%s'", info.getName()));
-						}, (info, progress) -> {
-							Log.d(TAG, String.format("Downloading '%s': %.1f%%",
-									info.getName(), progress * 100));
-						}, (info, error) -> {
-							Log.e(TAG, String.format("Error downloading '%s': %s",
-									info.getName(), error));
-						});
+				transferer.downloadFiles(result1, file, f -> {
+					if (f.getName().startsWith(".")) {
+						Log.w(TAG, "Skiping '" + f.getName() + "'");
+						return false;
+					}
+					return true;
+				}, info -> {
+					Log.i(TAG, String.format("Successfully downloaded '%s'", info.getName()));
+				}, (info, progress) -> {
+					Log.d(TAG, String.format("Downloading '%s': %.1f%%",
+							info.getName(), progress * 100));
+				}, (info, error) -> {
+					if (info == null)
+						Log.e(TAG, "Error while downloading: " + error);
+					else
+						Log.e(TAG, String.format("Error downloading '%s': %s",
+								info.getName(), error));
+				});
 			}, (info, error) -> Log.e(TAG, "Error while listing files: " + error));
 		}, (info, error) -> {
 			Log.e(TAG, "Changing directory failed.");

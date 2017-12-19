@@ -44,6 +44,7 @@ public class PermissionManager {
 		}
 
 		listener.onPermissionResult(requestCode, results);
+		permissionManager.listenMap.remove(requestCode);
 		return true;
 	}
 

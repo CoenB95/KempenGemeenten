@@ -63,7 +63,7 @@ public class FTPFileBrowser extends FileBrowser {
 			error = "Connection closed.";
 			return null;
 		} catch (IOException e) {
-			error = "IOException.";
+			error = "IOException: " + e.getMessage();
 			return null;
 		}
 	}
