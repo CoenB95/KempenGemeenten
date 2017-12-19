@@ -41,4 +41,5 @@ dependencies {
     implementation 'commons-net:commons-net:3.6'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.esri.arcgisruntime:arcgis-android:100.1.0'
+    implementation 'com.google.android.gms:play-services-maps:11.6.2'
 }

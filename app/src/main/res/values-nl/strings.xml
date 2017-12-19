@@ -30,4 +30,5 @@
     <string name="home">Start</string>
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">Sluit drawer</string>
+    <string name="map">Kaart</string>
 </resources>

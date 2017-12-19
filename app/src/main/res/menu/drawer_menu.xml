@@ -4,6 +4,9 @@
 
     <group >
         <item
+            android:id="@+id/map"
+            android:title="@string/map" />
+        <item
             android:id="@+id/home"
             android:title="@string/home" />
     </group>

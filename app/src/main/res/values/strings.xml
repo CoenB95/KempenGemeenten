@@ -18,7 +18,7 @@
     <string name="blader">Browse</string>
     <string name="ok">Selecteer</string>
     <string name="description">Picture</string>
-	<string name="go_back">Go back</string>
+    <string name="go_back">Go back</string>
     <string name="copyright" translatable="false">©2015 CB Apps</string>
     <string name="acra_title">Crash</string>
     <string name="acra_text">The app crashed due to an exceptional situation. By sending information containing the cause of this crash, you can help us fix it.</string>
@@ -32,5 +32,7 @@
     <string name="home">Home</string>
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">Close drawer</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="map">Map</string>
 
 </resources>
