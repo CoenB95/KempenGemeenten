@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.preference.PreferenceDialogFragmentCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -30,7 +31,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * @author CoenB95
  */
 
-public class FileBrowserFragment extends DialogFragment {
+public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 
 	private static final String TAG = "FileBrowserFragment";
 	private static final int MODE_FTP = 1;
@@ -45,10 +46,40 @@ public class FileBrowserFragment extends DialogFragment {
 	private int mode;
 	private String path;
 
-	@Nullable
+	public static FileBrowserFragment newInstance(String key) {
+		FileBrowserFragment fragment = new FileBrowserFragment();
+		Bundle b = new Bundle(1);
+		b.putString(ARG_KEY, key);
+		fragment.setArguments(b);
+		return fragment;
+	}
+
 	@Override
-	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.file_browser_layout, container, false);
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		if (savedInstanceState != null) {
+			path = savedInstanceState.getString("path");
+			mode = savedInstanceState.getInt("mode");
+			switch (mode) {
+				case MODE_FTP:
+					Log.d(TAG, "Restored FTP browsing mode");
+					browseFTP();
+					break;
+				case MODE_LOCAL_FILES:
+					Log.d(TAG, "Restored local files browsing mode");
+					browseLocalFiles();
+					break;
+				default:
+					Log.d(TAG, "Could not restore browsing mode");
+					break;
+			}
+		}
+	}
+
+	@Override
+	protected void onBindDialogView(View view) {
+		super.onBindDialogView(view);
+		//View view = inflater.inflate(R.layout.file_browser_layout, container, false);
 
 		handler = new Handler();
 
@@ -69,30 +100,8 @@ public class FileBrowserFragment extends DialogFragment {
 		fileBrowserRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 		fileBrowserRecyclerView.setAdapter(fileBrowserAdapter);
 
-		path = "";
-
-		if (savedInstanceState != null) {
-			path = savedInstanceState.getString("path");
-			mode = savedInstanceState.getInt("mode");
-			switch (mode) {
-				case MODE_FTP:
-					Log.d(TAG, "Restored FTP browsing mode");
-					browseFTP();
-					break;
-				case MODE_LOCAL_FILES:
-					Log.d(TAG, "Restored local files browsing mode");
-					browseLocalFiles();
-					break;
-				default:
-					Log.d(TAG, "Could not restore browsing mode");
-					break;
-			}
-		}
-
 		if (browser != null)
 			moveAndList(path);
-
-		return view;
 	}
 
 	public void browseFTP() {
@@ -137,16 +146,14 @@ public class FileBrowserFragment extends DialogFragment {
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
-		if (getDialog() != null && getDialog().getWindow() != null)
-			getDialog().getWindow().setLayout(WRAP_CONTENT, MATCH_PARENT);
-	}
-
-	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putString("path", path);
 		outState.putInt("mode", mode);
+	}
+
+	@Override
+	public void onDialogClosed(boolean positiveResult) {
+
 	}
 }
