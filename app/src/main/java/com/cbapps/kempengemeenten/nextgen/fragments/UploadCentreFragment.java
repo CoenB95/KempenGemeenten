@@ -79,7 +79,7 @@ public class UploadCentreFragment extends DialogFragment {
 
 		uploadButton.setOnClickListener(v -> {
 			FileBrowserFragment browser = new FileBrowserFragment();
-			browser.browseFTP();
+			browser.setBrowseMode(FileBrowserFragment.MODE_FTP_FILES);
 			browser.show(getChildFragmentManager(), "FileBrowser");
 		});
 

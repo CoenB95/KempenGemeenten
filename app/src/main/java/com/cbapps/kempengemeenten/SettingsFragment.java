@@ -29,7 +29,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 	private DialogFragment onCreatePreferenceDialogFragment(Preference preference) {
 		if (preference instanceof LocationChooserDialog) {
 			FileBrowserFragment browserFragment = FileBrowserFragment.newInstance(preference.getKey());
-			browserFragment.browseFTP();
+			browserFragment.setBrowseMode(FileBrowserFragment.MODE_FTP_DIRECTORIES);
 			return browserFragment;
 		}
 		return null;

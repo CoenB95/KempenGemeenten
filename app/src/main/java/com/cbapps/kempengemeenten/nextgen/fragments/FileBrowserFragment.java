@@ -33,9 +33,11 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 
-	private static final String TAG = "FileBrowserFragment";
-	private static final int MODE_FTP = 1;
-	private static final int MODE_LOCAL_FILES = 2;
+	public static final String TAG = "FileBrowserFragment";
+	public static final int MODE_FTP_DIRECTORIES = 1;
+	public static final int MODE_FTP_FILES = 2;
+	public static final int MODE_LOCAL_DIRECTORIES = 3;
+	public static final int MODE_LOCAL_FILES = 4;
 
 	private FileBrowser browser;
 	private FileBrowserAdapter fileBrowserAdapter;
@@ -43,6 +45,7 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 	private ProgressBar progressCircle;
 	private TextView filePathEditText;
 	private Handler handler;
+
 	private int mode;
 	private String path;
 
@@ -61,18 +64,19 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 			path = savedInstanceState.getString("path");
 			mode = savedInstanceState.getInt("mode");
 			switch (mode) {
-				case MODE_FTP:
+				case MODE_FTP_DIRECTORIES:
+				case MODE_FTP_FILES:
 					Log.d(TAG, "Restored FTP browsing mode");
-					browseFTP();
 					break;
+				case MODE_LOCAL_DIRECTORIES:
 				case MODE_LOCAL_FILES:
-					Log.d(TAG, "Restored local files browsing mode");
-					browseLocalFiles();
+					Log.d(TAG, "Restored local browsing mode");
 					break;
 				default:
 					Log.d(TAG, "Could not restore browsing mode");
 					break;
 			}
+			setBrowseMode(mode);
 		}
 	}
 
@@ -94,7 +98,19 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 		});
 
 		fileBrowserAdapter = new FileBrowserAdapter();
-		fileBrowserAdapter.setListener(info -> moveAndList(info.getPath()));
+		fileBrowserAdapter.setListener(info -> {
+			switch (mode) {
+				case MODE_FTP_DIRECTORIES:
+				case MODE_LOCAL_DIRECTORIES:
+					if (info.isDirectory())
+						moveAndList(info.getPath());
+					break;
+				case MODE_FTP_FILES:
+				case MODE_LOCAL_FILES:
+					moveAndList(info.getPath());
+					break;
+			}
+		});
 
 		fileBrowserRecyclerView = view.findViewById(R.id.fileRecyclerView);
 		fileBrowserRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -104,14 +120,20 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 			moveAndList(path);
 	}
 
-	public void browseFTP() {
-		mode = MODE_FTP;
-		browser = new FTPFileBrowser(FTPFileConnection.getConnection());
-		if (isVisible()) moveAndList(null);
-	}
-
-	public void browseLocalFiles() {
-		mode = MODE_LOCAL_FILES;
+	public void setBrowseMode(int browseMode) {
+		switch (browseMode) {
+			case MODE_FTP_DIRECTORIES:
+			case MODE_FTP_FILES:
+				browser = new FTPFileBrowser(FTPFileConnection.getConnection());
+				if (isVisible()) moveAndList(null);
+				break;
+			case MODE_LOCAL_DIRECTORIES:
+			case MODE_LOCAL_FILES:
+				break;
+			default:
+				throw new IllegalArgumentException("Not a mode");
+		}
+		mode = browseMode;
 	}
 
 	private void moveAndList(String path) {
