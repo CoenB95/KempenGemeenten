@@ -55,7 +55,6 @@ public class UploadCentreFragment extends DialogFragment {
 	private Handler handler;
 	private Button downloadButton;
 	private Button uploadButton;
-	private RecyclerView uploadStatusRecyclerView;
 	private FileBrowserAdapter adapter;
 
 	@Nullable
@@ -67,7 +66,7 @@ public class UploadCentreFragment extends DialogFragment {
 
 		adapter = new FileBrowserAdapter();
 
-		uploadStatusRecyclerView = view.findViewById(R.id.uploadStatusRecyclerView);
+		RecyclerView uploadStatusRecyclerView = view.findViewById(R.id.uploadStatusRecyclerView);
 		uploadStatusRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 		uploadStatusRecyclerView.setAdapter(adapter);
 
@@ -130,7 +129,7 @@ public class UploadCentreFragment extends DialogFragment {
 		FileInfo file = new DefaultFileInfo(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
 		fileBrowser.moveIntoDirectory("/+Geodata/sqlite voor locus", result -> {
 			fileBrowser.listFiles(result1 -> {
-				adapter.setAllFiles(result1, true);
+				adapter.clearFiles();
 				StringBuilder builder = new StringBuilder("The following files are in the directory:");
 				for (FileInfo info : result1)
 					builder.append('\n').append(info.getName())
@@ -142,10 +141,11 @@ public class UploadCentreFragment extends DialogFragment {
 						Log.w(TAG, "Skiping '" + f.getName() + "'");
 						return false;
 					}
+					adapter.addFile(f, true);
 					return true;
 				}, info -> {
 					Log.i(TAG, String.format("Successfully downloaded '%s'", info.getName()));
-					//adapter.showProgress(info, false);
+					adapter.showProgress(info, false);
 				}, (info, progress) -> {
 					Log.d(TAG, String.format("Downloading '%s': %.1f%%",
 							info.getName(), progress * 100));

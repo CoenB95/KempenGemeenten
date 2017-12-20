@@ -31,6 +31,16 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 		handler = new Handler();
 	}
 
+	public void addFile(FileInfo info, boolean enableProgress) {
+		handler.post(() -> {
+			FileItem item = new FileItem(info);
+			item.enableProgress(enableProgress);
+			fileInfos.add(item);
+			Collections.sort(fileInfos);
+			notifyDataSetChanged();
+		});
+	}
+
 	public void clearFiles() {
 		fileInfos.clear();
 		notifyDataSetChanged();
