@@ -14,6 +14,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -44,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
 	private static final String TAG = "MainActivity";
 
-	ActionBarDrawerToggle drawerToggle;
+	private DrawerLayout drawerLayout;
+	private ActionBarDrawerToggle drawerToggle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +57,14 @@ public class MainActivity extends AppCompatActivity {
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
+		drawerLayout = findViewById(R.id.drawer);
+		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
+				R.string.drawer_open, R.string.drawer_close);
+		drawerLayout.addDrawerListener(drawerToggle);
+
 		NavigationView navigationView = findViewById(R.id.navigationView);
 		navigationView.setNavigationItemSelectedListener(item -> {
+			drawerLayout.closeDrawers();
 			switch (item.getItemId()) {
 				case R.id.map:
 					showMap();
@@ -67,18 +76,15 @@ public class MainActivity extends AppCompatActivity {
 			return false;
 		});
 
-		DrawerLayout drawerLayout = findViewById(R.id.drawer);
-		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
-				R.string.drawer_open, R.string.drawer_close);
-		drawerLayout.addDrawerListener(drawerToggle);
-
 		if (getSupportActionBar() == null)
 			throw new IllegalStateException("We can not have no action bar!");
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		PermissionManager.setup(this);
 
-		showMap();
+		if (savedInstanceState == null) {
+			showMap();
+		}
 	}
 
 	private void showButtons() {
@@ -131,11 +137,22 @@ public class MainActivity extends AppCompatActivity {
 
 		switch (item.getItemId()) {
 			case R.id.action_settings:
-				Intent intent = new Intent(getBaseContext(), SettingsActivity.class);
-				intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT,
-						SettingsFragment.class.getName());
-				intent.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true);
-				startActivity(intent);
+				SettingsFragment settingsFragment = new SettingsFragment();
+				getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+					Fragment fragment = getSupportFragmentManager().findFragmentByTag("Settings");
+					if (fragment == null || !fragment.isVisible()) {
+						drawerToggle.setDrawerIndicatorEnabled(true);
+						drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+					}
+				});
+				getSupportFragmentManager()
+						.beginTransaction()
+						.addToBackStack(null)
+						.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+						.replace(R.id.content, settingsFragment, "Settings")
+						.commit();
+				drawerToggle.setDrawerIndicatorEnabled(false);
+				drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 		}
 		return true;
 	}
