@@ -114,7 +114,7 @@ public class UploadCentreFragment extends DialogFragment {
 		transferer = new FTPFileTransferer(connection);
 		ExecutorService service = Executors.newCachedThreadPool();
 		service.submit(() -> {
-			if (connection.checkConnection()) {
+			if (connection.connect()) {
 				handler.post(() -> {
 					downloadButton.setEnabled(true);
 					uploadButton.setEnabled(true);

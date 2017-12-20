@@ -27,14 +27,18 @@ public class FTPFileBrowser extends FileBrowser {
 	@Override
 	protected boolean changeDirectory(String subDirName) {
 		error = null;
-		if (!connection.checkConnection()) {
-			error = "Could not connect to FTP server.";
-			return false;
-		}
 		try {
 			FTPFile f = connection.getClient().mlistFile(subDirName);
 			setCurrentFile(new FTPFileInfo(f).withPathAndName(subDirName));
 			return true;
+		} catch (FTPConnectionClosedException e) {
+			Log.w(TAG, "Connection closed, try to reopen it.");
+			if (connection.connect())
+				return changeDirectory(subDirName);
+			else {
+				error = "Connection closed.";
+				return false;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
@@ -48,10 +52,6 @@ public class FTPFileBrowser extends FileBrowser {
 
 	@Override
 	protected List<FileInfo> listFiles(String remoteDirectoryName) {
-		if (!connection.checkConnection()) {
-			error = "Could not connect to FTP server.";
-			return null;
-		}
 		try {
 			FTPFile[] files = connection.getClient().listFiles(remoteDirectoryName);
 			List<FileInfo> fileInfos = new ArrayList<>();
@@ -60,8 +60,13 @@ public class FTPFileBrowser extends FileBrowser {
 			}
 			return fileInfos;
 		} catch (FTPConnectionClosedException e) {
-			error = "Connection closed.";
-			return null;
+			Log.w(TAG, "Connection closed, try to reopen it.");
+			if (connection.connect())
+				return listFiles(remoteDirectoryName);
+			else {
+				error = "Connection closed.";
+				return null;
+			}
 		} catch (IOException e) {
 			error = "IOException: " + e.getMessage();
 			return null;

@@ -8,6 +8,7 @@ import com.cbapps.kempengemeenten.nextgen.callback.OnSuccessListener;
 import com.cbapps.kempengemeenten.nextgen.callback.Predicate;
 
 import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.io.CopyStreamAdapter;
 
 import java.io.File;
@@ -60,12 +61,6 @@ public class FTPFileTransferer {
 				outputFile = new File(outputFile, remoteFileInfo.getName());
 			}
 
-			if (!connection.checkConnection()) {
-				if (errorListener != null)
-					errorListener.onError("Could not connect to FTP server.");
-				return null;
-			}
-
 			try {
 				long fileSize = remoteFileInfo.getSize();
 				connection.getClient().setFileType(FTP.BINARY_FILE_TYPE);
@@ -93,6 +88,10 @@ public class FTPFileTransferer {
 						errorListener.onError("Bad reply: " + connection.getClient().getReplyString());
 					return null;
 				}
+			} catch (FTPConnectionClosedException e) {
+				if (errorListener != null)
+					errorListener.onError("Could not connect to FTP server.");
+				return null;
 			} catch (FileNotFoundException e) {
 				if (errorListener != null)
 					errorListener.onError("Output-file not found");

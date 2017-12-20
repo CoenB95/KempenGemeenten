@@ -1,6 +1,7 @@
 package com.cbapps.kempengemeenten.nextgen;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
@@ -38,15 +39,9 @@ public class FTPFileConnection {
 		password = "Ftpgeo1";
 	}
 
-	public boolean checkConnection() {
-		return connect();
-	}
-
-	private boolean connect() {
-		if (client.isConnected()) {
-			return true;
-		}
+	public boolean connect() {
 		try {
+			Log.w(TAG, "Connecting to server...");
 			client.connect(hostName);
 			client.enterLocalPassiveMode();
 			try {
