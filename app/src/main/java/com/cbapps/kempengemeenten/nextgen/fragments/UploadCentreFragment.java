@@ -55,8 +55,8 @@ public class UploadCentreFragment extends DialogFragment {
 	private Handler handler;
 	private Button downloadButton;
 	private Button uploadButton;
-
-	private boolean awaitingDownloadPermission;
+	private RecyclerView uploadStatusRecyclerView;
+	private FileBrowserAdapter adapter;
 
 	@Nullable
 	@Override
@@ -64,6 +64,12 @@ public class UploadCentreFragment extends DialogFragment {
 		View view = inflater.inflate(R.layout.main_screen, container, false);
 
 		handler = new Handler();
+
+		adapter = new FileBrowserAdapter();
+
+		uploadStatusRecyclerView = view.findViewById(R.id.uploadStatusRecyclerView);
+		uploadStatusRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+		uploadStatusRecyclerView.setAdapter(adapter);
 
 		downloadButton = view.findViewById(R.id.downloadButton);
 		uploadButton = view.findViewById(R.id.uploadButton);
@@ -122,8 +128,9 @@ public class UploadCentreFragment extends DialogFragment {
 	private void downloadFiles() {
 		Log.i(TAG, "Downloading files...");
 		FileInfo file = new DefaultFileInfo(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
-		fileBrowser.moveIntoDirectory("/+Geodata/foto's gsms", result -> {
+		fileBrowser.moveIntoDirectory("/+Geodata/sqlite voor locus", result -> {
 			fileBrowser.listFiles(result1 -> {
+				adapter.setAllFiles(result1, true);
 				StringBuilder builder = new StringBuilder("The following files are in the directory:");
 				for (FileInfo info : result1)
 					builder.append('\n').append(info.getName())
@@ -138,9 +145,11 @@ public class UploadCentreFragment extends DialogFragment {
 					return true;
 				}, info -> {
 					Log.i(TAG, String.format("Successfully downloaded '%s'", info.getName()));
+					//adapter.showProgress(info, false);
 				}, (info, progress) -> {
 					Log.d(TAG, String.format("Downloading '%s': %.1f%%",
 							info.getName(), progress * 100));
+					adapter.updateProgress(info, progress);
 				}, (info, error) -> {
 					if (info == null)
 						Log.e(TAG, "Error while downloading: " + error);
