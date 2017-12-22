@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.preference.DialogPreference;
 import android.support.v7.preference.PreferenceDialogFragmentCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.LocationChooserDialog;
 import com.cbapps.kempengemeenten.nextgen.FTPFileBrowser;
 import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
 import com.cbapps.kempengemeenten.nextgen.FileBrowser;
@@ -55,6 +57,10 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 		b.putString(ARG_KEY, key);
 		fragment.setArguments(b);
 		return fragment;
+	}
+
+	public LocationChooserDialog getFileLocationPreference() {
+		return ((LocationChooserDialog) getPreference());
 	}
 
 	@Override
@@ -176,6 +182,7 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 
 	@Override
 	public void onDialogClosed(boolean positiveResult) {
-
+		if (positiveResult)
+			getFileLocationPreference().setPath(path);
 	}
 }

@@ -7,7 +7,7 @@
     <PreferenceCategory android:title="Lokale opslag">
         <com.cbapps.kempengemeenten.LocationChooserDialog
 	        android:dialogTitle="@string/locatie"
-			android:key="bestandslocatie"
+			android:key="ftpDownloadLocation"
 			android:positiveButtonText="@string/opslaan"
 			android:negativeButtonText="@string/cancel"
 			android:title="@string/locatie"

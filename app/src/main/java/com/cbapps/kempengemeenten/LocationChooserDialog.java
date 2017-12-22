@@ -18,9 +18,25 @@ import android.widget.ProgressBar;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class LocationChooserDialog extends DialogPreference {
+	private String path;
 
 	public LocationChooserDialog(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		setDialogLayoutResource(R.layout.file_browser_layout);
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	@Override
+	protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
+		setPath(restoreValue ? getPersistedString(path) : (String) defaultValue);
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+		persistString(path);
+		setSummary(path);
 	}
 }

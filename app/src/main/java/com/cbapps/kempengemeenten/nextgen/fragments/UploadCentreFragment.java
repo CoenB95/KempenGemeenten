@@ -3,6 +3,7 @@ package com.cbapps.kempengemeenten.nextgen.fragments;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -12,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -94,7 +96,10 @@ public class UploadCentreFragment extends DialogFragment {
 				if (result.getPermission().equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 					if (result.isGranted()) {
 						Log.d(TAG, "Storage writing granted.");
-						downloadFiles();
+						SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity().getBaseContext());
+						String remoteDirectoryName = preferences.getString("ftpDownloadLocation", null);
+						if (remoteDirectoryName != null)
+							downloadFiles(remoteDirectoryName);
 					} else
 						Log.d(TAG, "Storage writing denied.");
 				} else
@@ -124,10 +129,10 @@ public class UploadCentreFragment extends DialogFragment {
 		service.shutdown();
 	}
 
-	private void downloadFiles() {
+	private void downloadFiles(String remoteDirectoryName) {
 		Log.i(TAG, "Downloading files...");
 		FileInfo file = new DefaultFileInfo(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
-		fileBrowser.moveIntoDirectory("/+Geodata/sqlite voor locus", result -> {
+		fileBrowser.moveIntoDirectory(remoteDirectoryName, result -> {
 			fileBrowser.listFiles(result1 -> {
 				adapter.clearFiles();
 				StringBuilder builder = new StringBuilder("The following files are in the directory:");
