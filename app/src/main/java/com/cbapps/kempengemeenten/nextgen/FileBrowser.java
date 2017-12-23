@@ -39,13 +39,17 @@ public abstract class FileBrowser {
 	public void listFiles(OnSuccessListener<List<FileInfo>> successListener,
 	                      OnErrorListener errorListener) {
 		service.submit(() -> {
-			List<FileInfo> fileInfos = listFiles(currentFile.getPath());
-			if (fileInfos != null) {
-				if (successListener != null)
-					successListener.onSuccess(fileInfos);
-			} else {
-				if (errorListener != null)
-					errorListener.onError("Error listing files: " + getError());
+			try {
+				List<FileInfo> fileInfos = listFiles(currentFile.getPath());
+				if (fileInfos != null) {
+					if (successListener != null)
+						successListener.onSuccess(fileInfos);
+				} else {
+					if (errorListener != null)
+						errorListener.onError("Error listing files: " + getError());
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		});
 	}
@@ -55,12 +59,16 @@ public abstract class FileBrowser {
 	public void moveIntoDirectory(String remoteDirectoryName, OnSuccessListener<FileInfo> successListener,
 	                              OnErrorListener errorListener) {
 		service.submit(() -> {
-			if (changeDirectory(remoteDirectoryName)) {
-				if (successListener != null)
-					successListener.onSuccess(currentFile);
-			} else {
-				if (errorListener != null)
-					errorListener.onError("Unknown error.");
+			try {
+				if (changeDirectory(remoteDirectoryName)) {
+					if (successListener != null)
+						successListener.onSuccess(currentFile);
+				} else {
+					if (errorListener != null)
+						errorListener.onError("Unknown error.");
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		});
 	}

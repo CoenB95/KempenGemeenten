@@ -42,8 +42,10 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 	}
 
 	public void clearFiles() {
-		fileInfos.clear();
-		notifyDataSetChanged();
+		handler.post(() -> {
+			fileInfos.clear();
+			notifyDataSetChanged();
+		});
 	}
 
 	public void updateProgress(FileInfo info, double progress) {

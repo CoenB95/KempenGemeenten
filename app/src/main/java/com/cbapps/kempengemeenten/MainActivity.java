@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -42,7 +43,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener {
 
 	private static final String TAG = "MainActivity";
 
@@ -138,23 +139,20 @@ public class MainActivity extends AppCompatActivity {
 		switch (item.getItemId()) {
 			case R.id.action_settings:
 				SettingsFragment settingsFragment = new SettingsFragment();
-				getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-					Fragment fragment = getSupportFragmentManager().findFragmentByTag("Settings");
-					if (fragment == null || !fragment.isVisible()) {
-						drawerToggle.setDrawerIndicatorEnabled(true);
-						drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-					}
-				});
 				getSupportFragmentManager()
 						.beginTransaction()
 						.addToBackStack(null)
 						.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
 						.replace(R.id.content, settingsFragment, "Settings")
 						.commit();
-				drawerToggle.setDrawerIndicatorEnabled(false);
-				drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 		}
 		return true;
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		getSupportFragmentManager().removeOnBackStackChangedListener(this);
 	}
 
 	@Override
@@ -166,5 +164,23 @@ public class MainActivity extends AppCompatActivity {
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 		if (!PermissionManager.onRequestPermissionsResult(requestCode, permissions, grantResults))
 			super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		getSupportFragmentManager().addOnBackStackChangedListener(this);
+	}
+
+	@Override
+	public void onBackStackChanged() {
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag("Settings");
+		if (fragment == null || !fragment.isVisible()) {
+			drawerToggle.setDrawerIndicatorEnabled(true);
+			drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+		} else {
+			drawerToggle.setDrawerIndicatorEnabled(false);
+			drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+		}
 	}
 }
