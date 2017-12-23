@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.nextgen.callback.Predicate;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,17 +62,35 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 		});
 	}
 
+	public void removeFile(FileInfo info) {
+		handler.post(() -> {
+			for (int i = 0; i < fileInfos.size(); i++) {
+				FileItem item = fileInfos.get(i);
+				if (item.info.equals(info)) {
+					fileInfos.remove(item);
+					notifyItemRemoved(i);
+					break;
+				}
+			}
+		});
+	}
+
 	public void setAllFiles(Collection<FileInfo> infos) {
 		setAllFiles(infos, false);
 	}
 
 	public void setAllFiles(Collection<FileInfo> infos, boolean enableProgress) {
+		setAllFiles(infos, f -> true, enableProgress);
+	}
+	public void setAllFiles(Collection<FileInfo> infos, Predicate<FileInfo> filter, boolean enableProgress) {
 		handler.post(() -> {
 			fileInfos.clear();
 			for (FileInfo info : infos) {
-				FileItem item = new FileItem(info);
-				item.enableProgress(enableProgress);
-				fileInfos.add(item);
+				if (filter.test(info)) {
+					FileItem item = new FileItem(info);
+					item.enableProgress(enableProgress);
+					fileInfos.add(item);
+				}
 			}
 			Collections.sort(fileInfos);
 			notifyDataSetChanged();

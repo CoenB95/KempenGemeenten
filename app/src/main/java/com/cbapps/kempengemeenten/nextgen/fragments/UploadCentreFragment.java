@@ -34,6 +34,7 @@ import com.cbapps.kempengemeenten.nextgen.FileBrowser;
 import com.cbapps.kempengemeenten.nextgen.FileBrowserAdapter;
 import com.cbapps.kempengemeenten.nextgen.FileInfo;
 import com.cbapps.kempengemeenten.nextgen.PermissionManager;
+import com.cbapps.kempengemeenten.nextgen.callback.Predicate;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -134,21 +135,18 @@ public class UploadCentreFragment extends DialogFragment {
 		FileInfo file = new DefaultFileInfo(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
 		fileBrowser.moveIntoDirectory(remoteDirectoryName, result -> {
 			fileBrowser.listFiles(result1 -> {
-				adapter.clearFiles();
+
+				Predicate<FileInfo> filter = f ->
+						!f.getName().startsWith(".");
+
+				adapter.setAllFiles(result1, filter, true);
 				StringBuilder builder = new StringBuilder("The following files are in the directory:");
 				for (FileInfo info : result1)
 					builder.append('\n').append(info.getName())
 							.append(" (").append(info.getSize()).append(" bytes)");
 				Log.d(TAG, builder.toString());
 
-				transferer.downloadFiles(result1, file, f -> {
-					if (f.getName().startsWith(".")) {
-						Log.w(TAG, "Skiping '" + f.getName() + "'");
-						return false;
-					}
-					adapter.addFile(f, true);
-					return true;
-				}, info -> {
+				transferer.downloadFiles(result1, file, filter, info -> {
 					Log.i(TAG, String.format("Successfully downloaded '%s'", info.getName()));
 					adapter.showProgress(info, false);
 				}, (info, progress) -> {
