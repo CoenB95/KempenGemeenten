@@ -4,21 +4,25 @@
     
     
     
-    <PreferenceCategory android:title="Lokale opslag">
+    <PreferenceCategory
+		android:title="Lokale opslag">
+
         <com.cbapps.kempengemeenten.LocationChooserDialog
 	        android:dialogTitle="@string/locatie"
 			android:key="ftpDownloadLocation"
 			android:positiveButtonText="@string/opslaan"
 			android:negativeButtonText="@string/cancel"
 			android:title="@string/locatie"
-			android:dialogLayout="@layout/choose_preference" />
-        <com.cbapps.kempengemeenten.UploadFromLocationChooserDialog
+			android:dialogLayout="@layout/choose_preference"
+			browseMode="ftpDirectories"/>
+        <com.cbapps.kempengemeenten.LocationChooserDialog
 	        android:dialogTitle="@string/locatie"
-	        android:key="bestandsmap"
+	        android:key="ftpUploadLocation"
 	        android:positiveButtonText="@string/opslaan"
 	        android:negativeButtonText="@string/cancel"
-	        android:title="@string/locatie"
-	        android:dialogLayout="@layout/choose_preference" />
+	        android:title="Test"
+	        android:dialogLayout="@layout/choose_preference"
+			browseMode="localDirectories"/>
         
     </PreferenceCategory>
 

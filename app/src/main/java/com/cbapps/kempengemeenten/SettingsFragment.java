@@ -14,23 +14,28 @@
 
 package com.cbapps.kempengemeenten;
 
+import android.Manifest;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
+import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 
 import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.nextgen.PermissionManager;
 import com.cbapps.kempengemeenten.nextgen.fragments.FileBrowserFragment;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
 
 	private static final String DIALOG_FRAGMENT_TAG = "SettingsFragment.DIALOG";
+	private static final String TAG = "SettingsFragment";
 
 	private DialogFragment onCreatePreferenceDialogFragment(Preference preference) {
 		if (preference instanceof LocationChooserDialog) {
-			FileBrowserFragment browserFragment = FileBrowserFragment.newInstance(preference.getKey());
-			browserFragment.setBrowseMode(FileBrowserFragment.MODE_FTP_DIRECTORIES);
-			return browserFragment;
+			return FileBrowserFragment.newInstance(preference.getKey());
 		}
 		return null;
 	}

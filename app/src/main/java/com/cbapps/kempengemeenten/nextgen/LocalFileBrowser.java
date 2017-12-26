@@ -37,6 +37,8 @@ public class LocalFileBrowser extends FileBrowser {
 		File directory = new File(directoryName);
 		File[] files = directory.listFiles();
 		List<FileInfo> fileInfos = new ArrayList<>();
+		if (files == null)
+			return fileInfos;
 		for (File file : files) {
 			fileInfos.add(new DefaultFileInfo(file));
 		}

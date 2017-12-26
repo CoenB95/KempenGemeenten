@@ -41,8 +41,6 @@ import java.util.concurrent.Executors;
 public class UploadCentreFragment extends DialogFragment {
 
 	private static final String TAG = "UploadCentreFragment";
-	private static final int WRITE_PERMISSION_REQUEST_CODE = 101;
-	private static final int READ_PERMISSION_REQUEST_CODE = 102;
 
 	private FTPFileConnection connection;
 	private FTPFileBrowser ftpFileBrowser;
@@ -73,12 +71,7 @@ public class UploadCentreFragment extends DialogFragment {
 		uploadButton.setEnabled(false);
 
 		downloadButton.setOnClickListener(this::onDownloadButtonClicked);
-
-		uploadButton.setOnClickListener(v -> {
-			FileBrowserFragment browser = new FileBrowserFragment();
-			browser.setBrowseMode(FileBrowserFragment.MODE_FTP_FILES);
-			browser.show(getChildFragmentManager(), "FileBrowser");
-		});
+		uploadButton.setOnClickListener(this::onUploadButtonClicked);
 
 		localFileBrowser = new LocalFileBrowser();
 		startFTP();
@@ -87,7 +80,7 @@ public class UploadCentreFragment extends DialogFragment {
 	}
 
 	public void onDownloadButtonClicked(View view) {
-		PermissionManager.requestPermission(WRITE_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
+		PermissionManager.requestPermission(PermissionManager.WRITE_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
 			for (PermissionManager.PermissionResult result : results) {
 				if (result.getPermission().equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 					if (result.isGranted()) {
@@ -107,7 +100,7 @@ public class UploadCentreFragment extends DialogFragment {
 	}
 
 	public void onUploadButtonClicked(View view) {
-		PermissionManager.requestPermission(READ_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
+		PermissionManager.requestPermission(PermissionManager.READ_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
 			for (PermissionManager.PermissionResult result : results) {
 				if (result.getPermission().equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
 					if (result.isGranted()) {

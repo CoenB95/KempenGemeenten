@@ -1,8 +1,10 @@
 package com.cbapps.kempengemeenten.nextgen.fragments;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -25,6 +28,8 @@ import com.cbapps.kempengemeenten.nextgen.FTPFileBrowser;
 import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
 import com.cbapps.kempengemeenten.nextgen.FileBrowser;
 import com.cbapps.kempengemeenten.nextgen.FileBrowserAdapter;
+import com.cbapps.kempengemeenten.nextgen.LocalFileBrowser;
+import com.cbapps.kempengemeenten.nextgen.PermissionManager;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -36,10 +41,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 
 	public static final String TAG = "FileBrowserFragment";
-	public static final int MODE_FTP_DIRECTORIES = 1;
-	public static final int MODE_FTP_FILES = 2;
-	public static final int MODE_LOCAL_DIRECTORIES = 3;
-	public static final int MODE_LOCAL_FILES = 4;
 
 	private FileBrowser browser;
 	private FileBrowserAdapter fileBrowserAdapter;
@@ -48,7 +49,6 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 	private TextView filePathEditText;
 	private Handler handler;
 
-	private int mode;
 	private String path;
 
 	public static FileBrowserFragment newInstance(String key) {
@@ -68,28 +68,13 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 		super.onCreate(savedInstanceState);
 		if (savedInstanceState != null) {
 			path = savedInstanceState.getString("path");
-			mode = savedInstanceState.getInt("mode");
-			switch (mode) {
-				case MODE_FTP_DIRECTORIES:
-				case MODE_FTP_FILES:
-					Log.d(TAG, "Restored FTP browsing mode");
-					break;
-				case MODE_LOCAL_DIRECTORIES:
-				case MODE_LOCAL_FILES:
-					Log.d(TAG, "Restored local browsing mode");
-					break;
-				default:
-					Log.d(TAG, "Could not restore browsing mode");
-					break;
-			}
-			setBrowseMode(mode);
 		}
+		setBrowseMode();
 	}
 
 	@Override
 	protected void onBindDialogView(View view) {
 		super.onBindDialogView(view);
-		//View view = inflater.inflate(R.layout.file_browser_layout, container, false);
 
 		handler = new Handler();
 
@@ -100,21 +85,22 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 		ImageButton backButton = view.findViewById(R.id.backButton);
 		backButton.setOnClickListener(view1 -> {
 			int index = path.lastIndexOf('/');
-			moveAndList(index > 0 ? path.substring(0, index) : "");
+			moveAndList(index > 0 ? path.substring(0, index) : "/");
+		});
+
+		EditText filePathEditText = view.findViewById(R.id.filePathEditText);
+		filePathEditText.setOnEditorActionListener((textView, i, keyEvent) -> {
+			moveAndList(filePathEditText.getText().toString());
+			return true;
 		});
 
 		fileBrowserAdapter = new FileBrowserAdapter();
 		fileBrowserAdapter.setListener(info -> {
-			switch (mode) {
-				case MODE_FTP_DIRECTORIES:
-				case MODE_LOCAL_DIRECTORIES:
-					if (info.isDirectory())
-						moveAndList(info.getPath());
-					break;
-				case MODE_FTP_FILES:
-				case MODE_LOCAL_FILES:
+			if (getFileLocationPreference().isDirectoriesMode()) {
+				if (info.isDirectory())
 					moveAndList(info.getPath());
-					break;
+			} else {
+				moveAndList(info.getPath());
 			}
 		});
 
@@ -126,28 +112,53 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 			moveAndList(path);
 	}
 
-	public void setBrowseMode(int browseMode) {
-		switch (browseMode) {
-			case MODE_FTP_DIRECTORIES:
-			case MODE_FTP_FILES:
-				browser = new FTPFileBrowser(FTPFileConnection.getConnection());
-				if (isVisible()) moveAndList(null);
-				break;
-			case MODE_LOCAL_DIRECTORIES:
-			case MODE_LOCAL_FILES:
-				break;
-			default:
-				throw new IllegalArgumentException("Not a mode");
-		}
-		mode = browseMode;
+	private void setBrowseMode() {
+		if (getFileLocationPreference().isFTPMode()) {
+			browser = new FTPFileBrowser(FTPFileConnection.getConnection());
+			if (isVisible()) moveAndList(null);
+		} else if (getFileLocationPreference().isLocalMode()) {
+			browser = new LocalFileBrowser();
+			if (isVisible()) moveAndList(null);
+		} else
+			throw new IllegalArgumentException("Not a mode");
 	}
 
 	private void moveAndList(String path) {
 		Log.i(TAG, "Listing files...");
+
+		if (getFileLocationPreference().isLocalMode()) {
+			Log.i(TAG, "Permission needed: external storage");
+			PermissionManager.requestPermission(PermissionManager.READ_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
+				for (PermissionManager.PermissionResult result : results) {
+					if (result.getPermission().equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+						if (result.isGranted()) {
+							Log.d(TAG, "Storage reading granted.");
+							moveAndListGranted(path);
+						} else
+							Log.d(TAG, "Storage reading denied.");
+					} else
+						Log.d(TAG, "Storage reading permission yet undecided.");
+				}
+			}, Manifest.permission.READ_EXTERNAL_STORAGE);
+		} else {
+			moveAndListGranted(path);
+		}
+	}
+
+	private void moveAndListGranted(String path) {
 		fileBrowserRecyclerView.animate().alpha(0).start();
 		progressCircle.animate().alpha(1).setListener(null).start();
 		progressCircle.setVisibility(View.VISIBLE);
-		browser.moveIntoDirectory(path == null || path.isEmpty() ? "/" : path, result -> {
+		if (path == null || path.isEmpty()) {
+			if (getFileLocationPreference().isLocalMode())
+				path = Environment.getExternalStorageDirectory().getPath();
+			else
+				path = "/";
+		}
+
+		final String fpath = path;
+
+		browser.moveIntoDirectory(path, result -> {
 			Log.i(TAG, "Moved into '" + result.getPath() + "'");
 			handler.post(() -> {
 				this.path = result.getPath();
@@ -169,7 +180,7 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 				Log.e(TAG, "Could not list files: " + errorMessage);
 			});
 		}, (info, errorMessage) -> {
-			Log.e(TAG, "Could not move into '" + path + "': " + errorMessage);
+			Log.e(TAG, "Could not move into '" + fpath + "': " + errorMessage);
 		});
 	}
 
@@ -177,7 +188,6 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putString("path", path);
-		outState.putInt("mode", mode);
 	}
 
 	@Override

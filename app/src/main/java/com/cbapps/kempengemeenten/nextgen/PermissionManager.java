@@ -18,6 +18,9 @@ import java.util.Map;
 
 public class PermissionManager {
 
+	public static final int WRITE_PERMISSION_REQUEST_CODE = 101;
+	public static final int READ_PERMISSION_REQUEST_CODE = 102;
+
 	private static final String TAG = "PermissionManager";
 
 	private static PermissionManager permissionManager;
