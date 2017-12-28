@@ -8,32 +8,35 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class RDToWGS84Converter implements CoordinateConverter {
 
-	private double A0 = 663304.11;
-	private double B0 = 5780984.54;
-	private double A1 = 99947.539;
-	private double B1 = 3290.106;
-	private double A2 = 20.008;
-	private double B2 = 1.310;
-	private double A3 = 2.041;
-	private double B3 = 0.203;
-	private double A4 = 0.001;
-	private double B4 = 0.000;
-	private double E0 = A0;
-	private double N0 = B0;
-	private double X0 = 155000;
-	private double Y0 = 463000;
+	private double X0      = 155000;
+	private double Y0      = 463000;
+	private double phi0    = 52.15517440;
+	private double lam0    = 5.38720621;
 
 	@Override
 	public LatLng toLatLng(double x, double y) {
-		double dX = Math.pow(x - X0, -5);
-		double dY = Math.pow(y - Y0, -5);
+		double[] Kp = {0,2,0,2,0,2,1,4,2,4,1};
+		double[] Kq = {1,0,2,1,3,2,0,0,3,1,1};
+		double[] Kpq = {3235.65389,-32.58297,-0.24750,-0.84978,-0.06550,-0.01709,-0.00738,0.00530,-0.00039,0.00033,-0.00012};
 
-		double E = E0 +
-				A1 * dX - B1 * dY +
-				A2 * (Math.pow(dX, 2) - Math.pow(dY, 2)) - B2 * (2 * dX * dY) +
-				A3 * (Math.pow(dX, 3) - 3 * dX * Math.pow(dY, 2)) - B3 * (3 * Math.pow(dX, 2) * dY - Math.pow(dY, 3)) +
-				A4 (dX4 - 6 dX2 dY2 + dY4) - B4 (4 dX3 dY - 4dY3 dX);
+		double[] Lp = {1,1,1,3,1,3,0,3,1,0,2,5};
+		double[] Lq = {0,1,2,0,3,1,1,2,4,2,0,0};
+		double[] Lpq = {5260.52916,105.94684,2.45656,-0.81885,0.05594,-0.05607,0.01199,-0.00256,0.00128,0.00022,-0.00022,0.00026};
 
-		return null;
+		double dX = 1E-5 * ( x - X0 );
+		double dY = 1E-5 * ( y - Y0 );
+
+		double phi = 0;
+		double lam = 0;
+
+		for(double k : Kpq)
+			phi = phi + (k * Math.pow(dX, k) * Math.pow(dY,k));
+		phi = phi0 + phi / 3600;
+
+		for (double l : Lpq)
+			lam = lam + ( l * Math.pow(dX, l) * Math.pow(dY, l));
+		lam = lam0 + lam / 3600;
+
+		return new LatLng(phi, lam);
 	}
 }
