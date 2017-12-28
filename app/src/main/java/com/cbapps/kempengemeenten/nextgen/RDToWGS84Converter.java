@@ -29,12 +29,12 @@ public class RDToWGS84Converter implements CoordinateConverter {
 		double phi = 0;
 		double lam = 0;
 
-		for(double k : Kpq)
-			phi = phi + (k * Math.pow(dX, k) * Math.pow(dY,k));
+		for (int k = 0; k < Kpq.length; k++)
+			phi = phi + (Kpq[k] * Math.pow(dX, Kp[k]) * Math.pow(dY, Kq[k]));
 		phi = phi0 + phi / 3600;
 
-		for (double l : Lpq)
-			lam = lam + ( l * Math.pow(dX, l) * Math.pow(dY, l));
+		for (int l = 0; l < Lpq.length; l++)
+			lam = lam + (Lpq[l] * Math.pow(dX, Lp[l]) * Math.pow(dY, Lq[l]));
 		lam = lam0 + lam / 3600;
 
 		return new LatLng(phi, lam);
