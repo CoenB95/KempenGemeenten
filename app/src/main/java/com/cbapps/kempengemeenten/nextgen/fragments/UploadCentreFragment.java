@@ -80,7 +80,7 @@ public class UploadCentreFragment extends DialogFragment {
 	}
 
 	public void onDownloadButtonClicked(View view) {
-		PermissionManager.requestPermission(PermissionManager.WRITE_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
+		PermissionManager.requestPermission(getActivity(), PermissionManager.WRITE_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
 			for (PermissionManager.PermissionResult result : results) {
 				if (result.getPermission().equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 					if (result.isGranted()) {
@@ -100,7 +100,7 @@ public class UploadCentreFragment extends DialogFragment {
 	}
 
 	public void onUploadButtonClicked(View view) {
-		PermissionManager.requestPermission(PermissionManager.READ_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
+		PermissionManager.requestPermission(getActivity(), PermissionManager.READ_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
 			for (PermissionManager.PermissionResult result : results) {
 				if (result.getPermission().equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
 					if (result.isGranted()) {

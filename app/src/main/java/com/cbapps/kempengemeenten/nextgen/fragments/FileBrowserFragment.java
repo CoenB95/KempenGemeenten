@@ -128,7 +128,7 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 
 		if (getFileLocationPreference().isLocalMode()) {
 			Log.i(TAG, "Permission needed: external storage");
-			PermissionManager.requestPermission(PermissionManager.READ_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
+			PermissionManager.requestPermission(getActivity(), PermissionManager.READ_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
 				for (PermissionManager.PermissionResult result : results) {
 					if (result.getPermission().equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
 						if (result.isGranted()) {

@@ -1,6 +1,7 @@
 package com.cbapps.kempengemeenten.nextgen;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -25,11 +26,9 @@ public class PermissionManager {
 
 	private static PermissionManager permissionManager;
 
-	private Activity activity;
 	private SparseArray<OnPermissionResultListener> listenMap;
 
-	private PermissionManager(Activity activity) {
-		this.activity = activity;
+	private PermissionManager() {
 		listenMap = new SparseArray<>();
 	}
 
@@ -51,7 +50,12 @@ public class PermissionManager {
 		return true;
 	}
 
-	public static void requestPermission(int requestCode, OnPermissionResultListener listener,
+	public static boolean checkPermission(Context context, String permission) {
+		return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
+	}
+
+	public static void requestPermission(Activity activity, int requestCode,
+	                                     OnPermissionResultListener listener,
 	                                     String... permissions) {
 		if (permissionManager == null)
 			throw new IllegalStateException("PermissionManager not yet setup.");
@@ -60,7 +64,7 @@ public class PermissionManager {
 		List<String> notYetGrantedPermissions = new ArrayList<>();
 
 		for (String permission : permissions) {
-			if (ContextCompat.checkSelfPermission(permissionManager.activity,
+			if (ContextCompat.checkSelfPermission(activity,
 					permission) == PackageManager.PERMISSION_GRANTED) {
 				//Permission has been granted already.
 				grantedPermissions.add(new PermissionResult(permission, true));
@@ -76,13 +80,13 @@ public class PermissionManager {
 			return;
 
 		permissionManager.listenMap.put(requestCode, listener);
-		ActivityCompat.requestPermissions(permissionManager.activity,
+		ActivityCompat.requestPermissions(activity,
 				notYetGrantedPermissions.toArray(new String[]{}),
 				requestCode);
 	}
 
-	public static void setup(Activity activity) {
-		permissionManager = new PermissionManager(activity);
+	public static void setup() {
+		permissionManager = new PermissionManager();
 	}
 
 	@FunctionalInterface

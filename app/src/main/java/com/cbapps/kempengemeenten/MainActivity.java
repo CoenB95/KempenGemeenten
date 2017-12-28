@@ -37,6 +37,7 @@ import com.cbapps.kempengemeenten.nextgen.FTPFileTransferer;
 import com.cbapps.kempengemeenten.nextgen.FileInfo;
 import com.cbapps.kempengemeenten.nextgen.PermissionManager;
 import com.cbapps.kempengemeenten.nextgen.fragments.FileBrowserFragment;
+import com.cbapps.kempengemeenten.nextgen.fragments.MapFragment;
 import com.cbapps.kempengemeenten.nextgen.fragments.UploadCentreFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			throw new IllegalStateException("We can not have no action bar!");
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		PermissionManager.setup(this);
+		PermissionManager.setup();
 
 		if (savedInstanceState == null) {
 			showMap();
@@ -97,10 +98,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	}
 
 	private void showMap() {
-		SupportMapFragment mapFragment = new SupportMapFragment();
-		mapFragment.getMapAsync(googleMap -> {
-			Toast.makeText(this, "Map initialized", Toast.LENGTH_SHORT).show();
-		});
+		MapFragment mapFragment = new MapFragment();
 		getSupportFragmentManager()
 				.beginTransaction()
 				.replace(R.id.content, mapFragment, "Map")
