@@ -3,14 +3,13 @@ package com.cbapps.kempengemeenten.nextgen.fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
+import android.os.Handler;
 import android.support.v7.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.cbapps.kempengemeenten.nextgen.CoordinateConverter;
-import com.cbapps.kempengemeenten.nextgen.LMSPoint;
+import com.cbapps.kempengemeenten.nextgen.database.LmsDatabase;
+import com.cbapps.kempengemeenten.nextgen.database.LmsPoint;
 import com.cbapps.kempengemeenten.nextgen.PermissionManager;
 import com.cbapps.kempengemeenten.nextgen.RDToWGS84Converter;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,12 +20,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author CoenB95
@@ -34,7 +34,12 @@ import java.util.List;
 
 public class MapFragment extends SupportMapFragment implements OnMapReadyCallback {
 
+	private ExecutorService service;
+	private Handler handler;
+
 	public MapFragment() {
+		service = Executors.newCachedThreadPool();
+		handler = new Handler();
 		getMapAsync(this);
 	}
 
@@ -62,42 +67,20 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	}
 
 	private void loadCSV(GoogleMap googleMap) {
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String filePath = preferences.getString("toDoListFilePath", null);
-		if (filePath == null) {
-			Toast.makeText(getContext(), "ToDo list not yet downloaded.", Toast.LENGTH_SHORT).show();
-			return;
-		}
+		service.submit(() -> {
+			List<LmsPoint> points = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
 
-		List<LMSPoint> points = new ArrayList<>();
-
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(filePath));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				line = line.replace("\"", "");
-				String[] split = line.split(";", -1);
-				if (split.length < 8)
-					continue;
-				LMSPoint point = new LMSPoint(Integer.valueOf(split[0]), Integer.valueOf(split[2]),
-						Integer.valueOf(split[3]), split[4], split[6], Integer.valueOf(split[7]),
-						split[8]);
-				points.add(point);
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		CoordinateConverter cc = new RDToWGS84Converter();
-		for (LMSPoint point : points) {
-			LatLng test = cc.toLatLng(point.rdX, point.rdY);
-			Marker marker = googleMap.addMarker(new MarkerOptions()
-					.position(test)
-					.title(point.town)
-					.snippet(point.street + " " + point.streetNumber));
-			marker.setTag(point.getLmsNumber());
-		}
+			handler.post(() -> {
+				CoordinateConverter cc = new RDToWGS84Converter();
+				for (LmsPoint point : points) {
+					LatLng test = cc.toLatLng(point.rdX, point.rdY);
+					Marker marker = googleMap.addMarker(new MarkerOptions()
+							.position(test)
+							.title(point.town)
+							.snippet(point.street + " " + point.streetNumber));
+					marker.setTag(point.getLmsNumber());
+				}
+			});
+		});
 	}
 }

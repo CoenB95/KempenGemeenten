@@ -29,8 +29,16 @@ import com.cbapps.kempengemeenten.nextgen.FileInfo;
 import com.cbapps.kempengemeenten.nextgen.LocalFileBrowser;
 import com.cbapps.kempengemeenten.nextgen.PermissionManager;
 import com.cbapps.kempengemeenten.nextgen.callback.Predicate;
+import com.cbapps.kempengemeenten.nextgen.database.LmsDatabase;
+import com.cbapps.kempengemeenten.nextgen.database.LmsPoint;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -143,24 +151,55 @@ public class UploadCentreFragment extends DialogFragment {
 	private void downloadToDoFile(String remoteFileName, String localFileName) {
 		Log.i(TAG, "Downloading todo list...");
 		ftpFileBrowser.moveIntoDirectory(remoteFileName, result -> {
-					FileInfo localFile = new DefaultFileInfo(new File(localFileName, result.getName()));
-					transferer.downloadFile(result, localFile,
-							info -> {
-								Log.i(TAG, String.format("Successfully downloaded '%s'",
-										info.getName()));
-								preferences.edit()
-										.putString("toDoListFilePath", localFile.getPath())
-										.apply();
-							},
-							(info, progress) ->
-									Log.d(TAG, String.format("Downloading '%s': %.1f%%",
-											info.getName(), progress * 100)),
-							(info, error) ->
-									Log.e(TAG, String.format("Error downloading '%s': %s",
-											result.getName(), error)));
+					try {
+						File tempFile = File.createTempFile("mutations", ".csv", getContext().getCacheDir());
+
+						FileInfo localFile = new DefaultFileInfo(tempFile);
+						transferer.downloadFile(result, localFile,
+								info -> {
+									Log.i(TAG, String.format("Successfully downloaded '%s'",
+											info.getName()));
+
+									List<LmsPoint> points = new ArrayList<>();
+
+									try {
+										BufferedReader reader = new BufferedReader(new FileReader(localFile.getPath()));
+										String line;
+										while ((line = reader.readLine()) != null) {
+											line = line.replace("\"", "");
+											String[] split = line.split(";", -1);
+											if (split.length < 8)
+												continue;
+											LmsPoint point = new LmsPoint(Integer.valueOf(split[0]), Integer.valueOf(split[2]),
+													Integer.valueOf(split[3]), split[4], split[6], Integer.valueOf(split[7]),
+													split[8]);
+											points.add(point);
+										}
+									} catch (FileNotFoundException e) {
+										e.printStackTrace();
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+
+									LmsDatabase.newInstance(getContext()).lmsDao().insertOrReplaceAll(points);
+
+									Log.i(TAG, String.format("Inserted %d points into database." +
+													" Temp-file deleted=%b",
+											points.size(), tempFile.delete()));
+								},
+								(info, progress) ->
+										Log.d(TAG, String.format("Downloading '%s': %.1f%%",
+												info.getName(), progress * 100)),
+								(info, error) -> {
+									Log.e(TAG, String.format("Error downloading '%s': %s." +
+													" Temp-file deleted=%b",
+											result.getName(), error, tempFile.delete()));
+								});
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				},
-				(info, error) ->
-						Log.e(TAG, "Error while listing files: " + error));
+				(info, error) -> Log.e(TAG, "Error while listing files: " + error));
 	}
 
 	private void uploadFiles(String localDirectoryName, String remoteDirectoryName) {

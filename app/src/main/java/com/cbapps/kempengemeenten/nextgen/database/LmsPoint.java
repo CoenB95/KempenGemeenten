@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten.nextgen;
+package com.cbapps.kempengemeenten.nextgen.database;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
@@ -8,7 +8,7 @@ import android.arch.persistence.room.PrimaryKey;
  */
 
 @Entity
-public class LMSPoint {
+public class LmsPoint {
 	@PrimaryKey
 	public int lmsNumber;
 	public int rdX;
@@ -18,11 +18,11 @@ public class LMSPoint {
 	public int streetNumber;
 	public String appendix;
 
-	public LMSPoint() {
+	public LmsPoint() {
 
 	}
 
-	public LMSPoint(int lmsNumber, int rdX, int rdY, String town, String street, int streetNumber, String appendix) {
+	public LmsPoint(int lmsNumber, int rdX, int rdY, String town, String street, int streetNumber, String appendix) {
 		this.lmsNumber = lmsNumber;
 		this.rdX = rdX;
 		this.rdY = rdY;
