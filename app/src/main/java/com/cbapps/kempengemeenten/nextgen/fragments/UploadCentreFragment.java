@@ -51,12 +51,14 @@ public class UploadCentreFragment extends DialogFragment {
 	private Button downloadButton;
 	private Button uploadButton;
 	private FileBrowserAdapter adapter;
+	private SharedPreferences preferences;
 
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.main_screen, container, false);
 
+		preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		handler = new Handler();
 
 		adapter = new FileBrowserAdapter();
@@ -85,11 +87,10 @@ public class UploadCentreFragment extends DialogFragment {
 				if (result.getPermission().equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 					if (result.isGranted()) {
 						Log.d(TAG, "Storage writing granted.");
-						SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity().getBaseContext());
 						String localDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 						String remoteDirectoryName = preferences.getString("ftpDownloadLocation", null);
 						if (remoteDirectoryName != null) {
-							downloadFiles(remoteDirectoryName, localDirectory);
+							downloadToDoFile(remoteDirectoryName, localDirectory);
 						}
 					} else
 						Log.d(TAG, "Storage writing denied.");
@@ -105,7 +106,6 @@ public class UploadCentreFragment extends DialogFragment {
 				if (result.getPermission().equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
 					if (result.isGranted()) {
 						Log.d(TAG, "Storage reading granted.");
-						SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity().getBaseContext());
 						String localDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 						String remoteDirectoryName = preferences.getString("ftpUploadLocation", null);
 						if (remoteDirectoryName != null) {
@@ -140,41 +140,27 @@ public class UploadCentreFragment extends DialogFragment {
 		service.shutdown();
 	}
 
-	private void downloadFiles(String remoteDirectoryName, String localDirectoryName) {
-		Log.i(TAG, "Downloading files...");
-		ftpFileBrowser.moveIntoDirectory(remoteDirectoryName, result -> {
-			ftpFileBrowser.listFiles(result1 -> {
-
-				Predicate<FileInfo> filter = f ->
-						!f.getName().startsWith(".");
-
-				adapter.setAllFiles(result1, filter, true);
-				StringBuilder builder = new StringBuilder("The following files are in the directory:");
-				for (FileInfo info : result1)
-					builder.append('\n').append(info.getName())
-							.append(" (").append(info.getSize()).append(" bytes)");
-				Log.d(TAG, builder.toString());
-
-				FileInfo localDirectory = new DefaultFileInfo(new File(localDirectoryName));
-
-				transferer.downloadFiles(result1, localDirectory, filter, info -> {
-					Log.i(TAG, String.format("Successfully downloaded '%s'", info.getName()));
-					adapter.showProgress(info, false);
-				}, (info, progress) -> {
-					Log.d(TAG, String.format("Downloading '%s': %.1f%%",
-							info.getName(), progress * 100));
-					adapter.updateProgress(info, progress);
-				}, (info, error) -> {
-					if (info == null)
-						Log.e(TAG, "Error while downloading: " + error);
-					else
-						Log.e(TAG, String.format("Error downloading '%s': %s",
-								info.getName(), error));
-				});
-			}, (info, error) -> Log.e(TAG, "Error while listing files: " + error));
-		}, (info, error) -> {
-			Log.e(TAG, "Changing directory failed.");
-		});
+	private void downloadToDoFile(String remoteFileName, String localFileName) {
+		Log.i(TAG, "Downloading todo list...");
+		ftpFileBrowser.moveIntoDirectory(remoteFileName, result -> {
+					FileInfo localFile = new DefaultFileInfo(new File(localFileName, result.getName()));
+					transferer.downloadFile(result, localFile,
+							info -> {
+								Log.i(TAG, String.format("Successfully downloaded '%s'",
+										info.getName()));
+								preferences.edit()
+										.putString("toDoListFilePath", localFile.getPath())
+										.apply();
+							},
+							(info, progress) ->
+									Log.d(TAG, String.format("Downloading '%s': %.1f%%",
+											info.getName(), progress * 100)),
+							(info, error) ->
+									Log.e(TAG, String.format("Error downloading '%s': %s",
+											result.getName(), error)));
+				},
+				(info, error) ->
+						Log.e(TAG, "Error while listing files: " + error));
 	}
 
 	private void uploadFiles(String localDirectoryName, String remoteDirectoryName) {

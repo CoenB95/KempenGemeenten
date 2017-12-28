@@ -14,7 +14,7 @@
 			android:negativeButtonText="@string/cancel"
 			android:title="@string/locatie"
 			android:dialogLayout="@layout/choose_preference"
-			browseMode="ftpDirectories"/>
+			browseMode="ftpFiles"/>
         <com.cbapps.kempengemeenten.LocationChooserDialog
 	        android:dialogTitle="@string/locatie"
 	        android:key="ftpUploadLocation"
