@@ -170,11 +170,16 @@ public class UploadCentreFragment extends DialogFragment {
 											String[] split = line.split(";", -1);
 											if (split.length < 8)
 												continue;
-											LmsPoint point = new LmsPoint(Integer.valueOf(split[0]), Integer.valueOf(split[2]),
-													Integer.valueOf(split[3]), split[4], split[6], Integer.valueOf(split[7]),
-													split[8]);
+											LmsPoint point = new LmsPoint(
+													Integer.valueOf(split[0]), //lms
+													Integer.valueOf(split[1]), //x
+													Integer.valueOf(split[2]), //y
+													split[3], //town
+													split[4]); //address
 											points.add(point);
 										}
+									} catch (NumberFormatException e) {
+										Log.e(TAG, "Could not parse csv.");
 									} catch (FileNotFoundException e) {
 										e.printStackTrace();
 									} catch (IOException e) {

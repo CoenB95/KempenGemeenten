@@ -9,7 +9,7 @@ import android.content.Context;
  * @author CoenB95
  */
 
-@Database(entities = {LmsPoint.class}, version = 1)
+@Database(entities = {LmsPoint.class}, version = 2)
 public abstract class LmsDatabase extends RoomDatabase {
 
 	private static LmsDatabase instance;
@@ -17,6 +17,7 @@ public abstract class LmsDatabase extends RoomDatabase {
 	public static LmsDatabase newInstance(Context context) {
 		if (instance == null) {
 			instance = Room.databaseBuilder(context, LmsDatabase.class, "lms-database")
+					.fallbackToDestructiveMigration()
 					.build();
 		}
 		return instance;

@@ -14,29 +14,21 @@ public class LmsPoint {
 	public int rdX;
 	public int rdY;
 	public String town;
-	public String street;
-	public int streetNumber;
-	public String appendix;
+	public String address;
 
 	public LmsPoint() {
 
 	}
 
-	public LmsPoint(int lmsNumber, int rdX, int rdY, String town, String street, int streetNumber, String appendix) {
+	public LmsPoint(int lmsNumber, int rdX, int rdY, String town, String address) {
 		this.lmsNumber = lmsNumber;
 		this.rdX = rdX;
 		this.rdY = rdY;
 		this.town = town;
-		this.street = street;
-		this.streetNumber = streetNumber;
-		this.appendix = appendix;
+		this.address = address;
 	}
 
 	public int getLmsNumber() {
 		return lmsNumber;
-	}
-
-	public boolean hasAppendix() {
-		return appendix != null;
 	}
 }

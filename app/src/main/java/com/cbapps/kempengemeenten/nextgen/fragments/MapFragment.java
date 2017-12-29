@@ -77,7 +77,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 					Marker marker = googleMap.addMarker(new MarkerOptions()
 							.position(test)
 							.title(point.town)
-							.snippet(point.street + " " + point.streetNumber));
+							.snippet(point.address));
 					marker.setTag(point.getLmsNumber());
 				}
 			});
