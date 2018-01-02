@@ -68,6 +68,8 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 		super.onCreate(savedInstanceState);
 		if (savedInstanceState != null) {
 			path = savedInstanceState.getString("path");
+		} else {
+			path = getFileLocationPreference().getPath();
 		}
 		setBrowseMode();
 	}
@@ -185,7 +187,7 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
+	public void onSaveInstanceState(@NonNull Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putString("path", path);
 	}
