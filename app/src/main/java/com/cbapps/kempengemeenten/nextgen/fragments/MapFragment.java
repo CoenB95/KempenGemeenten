@@ -2,7 +2,10 @@ package com.cbapps.kempengemeenten.nextgen.fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -24,6 +27,12 @@ import com.cbapps.kempengemeenten.nextgen.database.LmsDatabase;
 import com.cbapps.kempengemeenten.nextgen.database.LmsPoint;
 import com.cbapps.kempengemeenten.nextgen.PermissionManager;
 import com.cbapps.kempengemeenten.nextgen.RDToWGS84Converter;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofenceStatusCodes;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingEvent;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -55,6 +64,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	private ExecutorService service;
 	private Handler handler;
 	private GoogleMap googleMap;
+	private GeofencingClient geofencingClient;
 
 	public MapFragment() {
 		service = Executors.newCachedThreadPool();
@@ -157,5 +167,60 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 					onPointSelected(points.get(0));
 			});
 		});
+	}
+
+	private void startGeofencing() {
+		if (getContext() == null)
+			return;
+
+		geofencingClient = LocationServices.getGeofencingClient(getContext());
+		if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
+				PackageManager.PERMISSION_GRANTED)
+			return;
+
+		Intent intent = new Intent(getContext(), GeofenceTransitionBroadcastReceiver.class);
+		geofencingClient.addGeofences(new GeofencingRequest.Builder()
+				.addGeofences()
+				.build(), PendingIntent.getBroadcast(getContext(), 0, intent,
+				PendingIntent.FLAG_UPDATE_CURRENT));
+	}
+
+	private class GeofenceTransitionBroadcastReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
+			if (geofencingEvent.hasError()) {
+				String errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode());
+				Log.e(TAG, errorMessage);
+				return;
+			}
+
+			// Get the transition type.
+			int geofenceTransition = geofencingEvent.getGeofenceTransition();
+
+			// Test that the reported transition was of interest.
+			if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
+					geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+
+				// Get the geofences that were triggered. A single event can trigger
+				// multiple geofences.
+				List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+
+				// Get the transition details as a String.
+				String geofenceTransitionDetails = getGeofenceTransitionDetails(
+						this,
+						geofenceTransition,
+						triggeringGeofences
+				);
+
+				// Send notification and log the transition details.
+				sendNotification(geofenceTransitionDetails);
+				Log.i(TAG, geofenceTransitionDetails);
+			} else {
+				// Log the error.
+				Log.e(TAG, "geofence_transition_invalid_type: " + geofenceTransition);
+			}
+		}
 	}
 }
