@@ -5,9 +5,9 @@
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     -->
     <style name="AppBaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
-	    <item name="colorPrimary">#C2CE24</item>
-	    <item name="colorPrimaryDark">#A9B50B</item>
-        <item name="colorAccent">#00646C</item>
+	    <item name="colorPrimary">@color/colorPrimary</item>
+	    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
         <!--
             Theme customizations available in newer API levels can go in
