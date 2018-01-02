@@ -6,14 +6,12 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -44,10 +42,6 @@ import com.google.maps.android.PolyUtil;
 
 import org.json.JSONException;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -61,14 +55,20 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
 	public static final String TAG = "MapFragment";
 
+	/**The default geofencing radius in meters.*/
+	private static final int GEOFENCE_RADIUS = 100;
+
 	private ExecutorService service;
 	private Handler handler;
 	private GoogleMap googleMap;
 	private GeofencingClient geofencingClient;
+	private List<LmsPoint> points;
+	private CoordinateConverter converter;
 
 	public MapFragment() {
 		service = Executors.newCachedThreadPool();
 		handler = new Handler();
+		converter = new RDToWGS84Converter();
 		getMapAsync(this);
 	}
 
@@ -120,8 +120,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 			return;
 		}
 
-		CoordinateConverter cc = new RDToWGS84Converter();
-		LatLng latLng = cc.toLatLng(point.rdX, point.rdY);
+		LatLng latLng = converter.toLatLng(point.rdX, point.rdY);
 		String apiKey = getString(R.string.google_maps_key);
 		RequestQueue queue = Volley.newRequestQueue(getContext());
 		queue.add(new JsonObjectRequest(Request.Method.GET,
@@ -150,18 +149,19 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
 	private void loadCSV(GoogleMap googleMap) {
 		service.submit(() -> {
-			List<LmsPoint> points = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
+			points = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
 
 			handler.post(() -> {
-				CoordinateConverter cc = new RDToWGS84Converter();
 				for (LmsPoint point : points) {
-					LatLng test = cc.toLatLng(point.rdX, point.rdY);
+					LatLng test = converter.toLatLng(point.rdX, point.rdY);
 					Marker marker = googleMap.addMarker(new MarkerOptions()
 							.position(test)
 							.title(point.town)
 							.snippet(point.address));
 					marker.setTag(point.getLmsNumber());
 				}
+
+				startGeofencing();
 
 				if (points.size() > 0)
 					onPointSelected(points.get(0));
@@ -178,9 +178,18 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 				PackageManager.PERMISSION_GRANTED)
 			return;
 
+		List<Geofence> fences = new ArrayList<>();
+		for (LmsPoint point : points) {
+			LatLng latLng = converter.toLatLng(point.rdX, point.rdY);
+			Geofence gf = new Geofence.Builder()
+					.setRequestId(String.valueOf(point.getLmsNumber()))
+					.setCircularRegion(latLng.latitude, latLng.longitude, GEOFENCE_RADIUS)
+					.build();
+		}
+
 		Intent intent = new Intent(getContext(), GeofenceTransitionBroadcastReceiver.class);
 		geofencingClient.addGeofences(new GeofencingRequest.Builder()
-				.addGeofences()
+				.addGeofences(fences)
 				.build(), PendingIntent.getBroadcast(getContext(), 0, intent,
 				PendingIntent.FLAG_UPDATE_CURRENT));
 	}
@@ -208,15 +217,15 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 				List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
 				// Get the transition details as a String.
-				String geofenceTransitionDetails = getGeofenceTransitionDetails(
-						this,
-						geofenceTransition,
-						triggeringGeofences
-				);
+//				String geofenceTransitionDetails = getGeofenceTransitionDetails(
+//						this,
+//						geofenceTransition,
+//						triggeringGeofences
+//				);
 
 				// Send notification and log the transition details.
-				sendNotification(geofenceTransitionDetails);
-				Log.i(TAG, geofenceTransitionDetails);
+//				sendNotification(geofenceTransitionDetails);
+//				Log.i(TAG, geofenceTransitionDetails);
 			} else {
 				// Log the error.
 				Log.e(TAG, "geofence_transition_invalid_type: " + geofenceTransition);
