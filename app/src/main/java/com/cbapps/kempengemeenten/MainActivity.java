@@ -36,6 +36,7 @@ import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
 import com.cbapps.kempengemeenten.nextgen.FTPFileTransferer;
 import com.cbapps.kempengemeenten.nextgen.FileInfo;
 import com.cbapps.kempengemeenten.nextgen.PermissionManager;
+import com.cbapps.kempengemeenten.nextgen.database.LmsPoint;
 import com.cbapps.kempengemeenten.nextgen.fragments.FileBrowserFragment;
 import com.cbapps.kempengemeenten.nextgen.fragments.MapFragment;
 import com.cbapps.kempengemeenten.nextgen.fragments.UploadCentreFragment;
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			drawerLayout.closeDrawers();
 			switch (item.getItemId()) {
 				case R.id.map:
-					showMap();
+					showMap(null);
 					return true;
 				case R.id.home:
 					showButtons();
@@ -84,9 +85,11 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 		PermissionManager.setup();
 
-		if (savedInstanceState == null) {
-			showMap();
-		}
+		LmsPoint point = (LmsPoint) getIntent().getSerializableExtra(MapFragment.EXTRA_SHOW_LMS_DETAIL);
+		if (point != null)
+			showMap(point);
+		else if (savedInstanceState == null)
+			showMap(null);
 	}
 
 	private void showButtons() {
@@ -97,8 +100,10 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 				.commit();
 	}
 
-	private void showMap() {
+	private void showMap(LmsPoint point) {
 		MapFragment mapFragment = new MapFragment();
+		if (point != null)
+			mapFragment.showLmsDetail(point);
 		getSupportFragmentManager()
 				.beginTransaction()
 				.replace(R.id.content, mapFragment, "Map")

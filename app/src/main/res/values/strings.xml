@@ -34,5 +34,9 @@
     <string name="drawer_close">Close drawer</string>
     <string name="title_activity_maps">Map</string>
     <string name="map">Map</string>
+    <string name="geofence_channel_name">Nearby measuring point</string>
+    <string name="geofence_channel_description">Enables notifications when you\'re nearby a measuring point.</string>
+    <string name="geofence_notification_title">Measuring point nearby</string>
+    <string name="geofence_notification_summary">Select for details</string>
 
 </resources>

@@ -3,12 +3,14 @@ package com.cbapps.kempengemeenten.nextgen.database;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+import java.io.Serializable;
+
 /**
  * @author CoenB95
  */
 
 @Entity
-public class LmsPoint {
+public class LmsPoint implements Serializable {
 	@PrimaryKey
 	public int lmsNumber;
 	public int rdX;

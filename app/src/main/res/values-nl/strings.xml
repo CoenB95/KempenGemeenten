@@ -31,4 +31,8 @@
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">Sluit drawer</string>
     <string name="map">Kaart</string>
+    <string name="geofence_channel_name">Dichtbij meetpunt</string>
+    <string name="geofence_channel_description">Schakel notificaties in voor wanneer je een meetpunt nadert.</string>
+    <string name="geofence_notification_title">Meetpunt naarbij</string>
+    <string name="geofence_notification_summary">Selecteer voor details</string>
 </resources>

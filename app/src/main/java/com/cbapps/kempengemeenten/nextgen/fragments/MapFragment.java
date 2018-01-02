@@ -2,6 +2,9 @@ package com.cbapps.kempengemeenten.nextgen.fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,6 +14,8 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -20,6 +25,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.MainActivity;
 import com.cbapps.kempengemeenten.nextgen.CoordinateConverter;
 import com.cbapps.kempengemeenten.nextgen.database.LmsDatabase;
 import com.cbapps.kempengemeenten.nextgen.database.LmsPoint;
@@ -31,9 +37,12 @@ import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -54,6 +63,8 @@ import java.util.concurrent.Executors;
 public class MapFragment extends SupportMapFragment implements OnMapReadyCallback {
 
 	public static final String TAG = "MapFragment";
+	public static final String EXTRA_SHOW_LMS_DETAIL = "show-lms-point-detail";
+	private static final String GEOFENCE_CHANNEL_ID = "geofence-channel";
 
 	/**The default geofencing radius in meters.*/
 	private static final int GEOFENCE_RADIUS = 100;
@@ -63,6 +74,8 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	private GoogleMap googleMap;
 	private GeofencingClient geofencingClient;
 	private List<LmsPoint> points;
+	private LmsPoint shownPoint;
+	private List<Marker> markers;
 	private CoordinateConverter converter;
 
 	public MapFragment() {
@@ -150,6 +163,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	private void loadCSV(GoogleMap googleMap) {
 		service.submit(() -> {
 			points = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
+			markers = new ArrayList<>();
 
 			handler.post(() -> {
 				for (LmsPoint point : points) {
@@ -159,7 +173,11 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 							.title(point.town)
 							.snippet(point.address));
 					marker.setTag(point.getLmsNumber());
+					markers.add(marker);
 				}
+
+				if (shownPoint != null)
+					showLmsDetail(shownPoint);
 
 				startGeofencing();
 
@@ -167,6 +185,19 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 					onPointSelected(points.get(0));
 			});
 		});
+	}
+
+	public void showLmsDetail(LmsPoint point) {
+		shownPoint = point;
+		if (googleMap == null)
+			return;
+		googleMap.animateCamera(CameraUpdateFactory.newLatLng(converter.toLatLng(point.rdX, point.rdY)));
+		for (Marker marker : markers) {
+			if (marker.getTag() != null && ((int) marker.getTag()) == point.getLmsNumber()) {
+				marker.showInfoWindow();
+				break;
+			}
+		}
 	}
 
 	private void startGeofencing() {
@@ -181,17 +212,50 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 		List<Geofence> fences = new ArrayList<>();
 		for (LmsPoint point : points) {
 			LatLng latLng = converter.toLatLng(point.rdX, point.rdY);
-			Geofence gf = new Geofence.Builder()
+			fences.add(new Geofence.Builder()
 					.setRequestId(String.valueOf(point.getLmsNumber()))
 					.setCircularRegion(latLng.latitude, latLng.longitude, GEOFENCE_RADIUS)
-					.build();
+					.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+					.setExpirationDuration(300_000)
+					.build());
 		}
+
+		if (fences.isEmpty())
+			return;
 
 		Intent intent = new Intent(getContext(), GeofenceTransitionBroadcastReceiver.class);
 		geofencingClient.addGeofences(new GeofencingRequest.Builder()
 				.addGeofences(fences)
 				.build(), PendingIntent.getBroadcast(getContext(), 0, intent,
 				PendingIntent.FLAG_UPDATE_CURRENT));
+
+		NotificationManager manager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+		if (manager != null) {
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+				NotificationChannel channel = new NotificationChannel(GEOFENCE_CHANNEL_ID,
+						getString(R.string.geofence_channel_name),
+						NotificationManager.IMPORTANCE_DEFAULT);
+				channel.setDescription(getString(R.string.geofence_channel_description));
+				channel.enableVibration(true);
+				manager.createNotificationChannel(channel);
+			}
+
+			Intent resultIntent = new Intent(getContext(), MainActivity.class);
+			resultIntent.putExtra(EXTRA_SHOW_LMS_DETAIL, points.get(0));
+			TaskStackBuilder stackBuilder = TaskStackBuilder.create(getContext());
+			stackBuilder.addParentStack(MainActivity.class);
+			stackBuilder.addNextIntent(resultIntent);
+			PendingIntent resultPendingIntent = stackBuilder
+					.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+			Notification notification = new NotificationCompat.Builder(getContext(), GEOFENCE_CHANNEL_ID)
+					.setContentTitle(getString(R.string.geofence_notification_title))
+					.setContentText(getString(R.string.geofence_notification_summary))
+					.setContentIntent(resultPendingIntent)
+					.setSmallIcon(R.drawable.logo)
+					.build();
+			manager.notify(0, notification);
+		}
 	}
 
 	private class GeofenceTransitionBroadcastReceiver extends BroadcastReceiver {
