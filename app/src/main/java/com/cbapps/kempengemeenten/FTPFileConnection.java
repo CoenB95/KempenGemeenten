@@ -1,20 +1,9 @@
-package com.cbapps.kempengemeenten.nextgen;
+package com.cbapps.kempengemeenten;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.io.CopyStreamAdapter;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author CoenB95

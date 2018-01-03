@@ -1,8 +1,6 @@
-package com.cbapps.kempengemeenten.nextgen;
+package com.cbapps.kempengemeenten;
 
 import android.support.annotation.NonNull;
-
-import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.File;
 

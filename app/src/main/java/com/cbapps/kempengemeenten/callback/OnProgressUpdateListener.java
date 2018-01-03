@@ -1,6 +1,4 @@
-package com.cbapps.kempengemeenten.nextgen.callback;
-
-import com.cbapps.kempengemeenten.nextgen.FileInfo;
+package com.cbapps.kempengemeenten.callback;
 
 /**
  * @author CoenB95

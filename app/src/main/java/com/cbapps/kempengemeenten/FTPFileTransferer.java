@@ -1,11 +1,11 @@
-package com.cbapps.kempengemeenten.nextgen;
+package com.cbapps.kempengemeenten;
 
 import android.util.Log;
 
-import com.cbapps.kempengemeenten.nextgen.callback.OnErrorListener;
-import com.cbapps.kempengemeenten.nextgen.callback.OnProgressUpdateListener;
-import com.cbapps.kempengemeenten.nextgen.callback.OnSuccessListener;
-import com.cbapps.kempengemeenten.nextgen.callback.Predicate;
+import com.cbapps.kempengemeenten.callback.OnErrorListener;
+import com.cbapps.kempengemeenten.callback.OnProgressUpdateListener;
+import com.cbapps.kempengemeenten.callback.OnSuccessListener;
+import com.cbapps.kempengemeenten.callback.Predicate;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;

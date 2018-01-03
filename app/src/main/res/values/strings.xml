@@ -3,40 +3,26 @@
 
     <string name="app_name">Kempen Gemeenten</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
     <string name="wachtwoord">Password</string>
     <string name="gebruiker">Username</string>
     <string name="login">Please login</string>
-    <string name="button">Login</string>
-    <string name="laden">Loading</string>
-    <string name="locatie">Local storage</string>
-    <string name="quickdownload">Snelle Download</string>
-    <string name="quick_select">Kies een bestand</string>
-    <string name="quick_locatie_invoer">Kies een bestand voor de download-knop</string>
-    <string name="opslaan">Save</string>
     <string name="cancel">Cancel</string>
-    <string name="blader">Browse</string>
     <string name="ok">Selecteer</string>
     <string name="description">Picture</string>
     <string name="go_back">Go back</string>
     <string name="copyright" translatable="false">©2015 CB Apps</string>
-    <string name="acra_title">Crash</string>
-    <string name="acra_text">The app crashed due to an exceptional situation. By sending information containing the cause of this crash, you can help us fix it.</string>
-    <string name="acra_done">Thank you!</string>
-    <string name="acra_toast">Something went wrong…</string>
     <string name="version">Version</string>
-    <string name="intent_auto_start">Auto opening…</string>
     <string name="upload">Upload</string>
     <string name="download">Download</string>
     <string name="choose_directory">Choose a directory</string>
     <string name="home">Home</string>
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">Close drawer</string>
-    <string name="title_activity_maps">Map</string>
     <string name="map">Map</string>
     <string name="geofence_channel_name">Nearby measuring point</string>
     <string name="geofence_channel_description">Enables notifications when you\'re nearby a measuring point.</string>
     <string name="geofence_notification_title">Measuring point nearby</string>
     <string name="geofence_notification_summary">Select for details</string>
+    <string name="save">Save</string>
 
 </resources>

@@ -1,8 +1,8 @@
-package com.cbapps.kempengemeenten.nextgen;
+package com.cbapps.kempengemeenten;
 
-import com.cbapps.kempengemeenten.nextgen.callback.OnErrorListener;
-import com.cbapps.kempengemeenten.nextgen.callback.OnProgressUpdateListener;
-import com.cbapps.kempengemeenten.nextgen.callback.OnSuccessListener;
+import com.cbapps.kempengemeenten.callback.OnErrorListener;
+import com.cbapps.kempengemeenten.callback.OnProgressUpdateListener;
+import com.cbapps.kempengemeenten.callback.OnSuccessListener;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

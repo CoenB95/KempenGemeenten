@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten.nextgen.fragments;
+package com.cbapps.kempengemeenten.fragments;
 
 import android.Manifest;
 import android.content.SharedPreferences;
@@ -18,19 +18,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.cb.kempengemeenten.R;
-import com.cbapps.kempengemeenten.nextgen.DefaultFileInfo;
-import com.cbapps.kempengemeenten.nextgen.FTPFileBrowser;
-import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
-import com.cbapps.kempengemeenten.nextgen.FTPFileInfo;
-import com.cbapps.kempengemeenten.nextgen.FTPFileTransferer;
-import com.cbapps.kempengemeenten.nextgen.FileBrowser;
-import com.cbapps.kempengemeenten.nextgen.FileBrowserAdapter;
-import com.cbapps.kempengemeenten.nextgen.FileInfo;
-import com.cbapps.kempengemeenten.nextgen.LocalFileBrowser;
-import com.cbapps.kempengemeenten.nextgen.PermissionManager;
-import com.cbapps.kempengemeenten.nextgen.callback.Predicate;
-import com.cbapps.kempengemeenten.nextgen.database.LmsDatabase;
-import com.cbapps.kempengemeenten.nextgen.database.LmsPoint;
+import com.cbapps.kempengemeenten.DefaultFileInfo;
+import com.cbapps.kempengemeenten.FTPFileBrowser;
+import com.cbapps.kempengemeenten.FTPFileConnection;
+import com.cbapps.kempengemeenten.FTPFileTransferer;
+import com.cbapps.kempengemeenten.FileBrowserAdapter;
+import com.cbapps.kempengemeenten.FileInfo;
+import com.cbapps.kempengemeenten.LocalFileBrowser;
+import com.cbapps.kempengemeenten.PermissionManager;
+import com.cbapps.kempengemeenten.callback.Predicate;
+import com.cbapps.kempengemeenten.database.LmsDatabase;
+import com.cbapps.kempengemeenten.database.LmsPoint;
 
 import java.io.BufferedReader;
 import java.io.File;

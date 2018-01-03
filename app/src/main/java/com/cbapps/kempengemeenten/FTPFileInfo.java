@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten.nextgen;
+package com.cbapps.kempengemeenten;
 
 import android.support.annotation.NonNull;
 

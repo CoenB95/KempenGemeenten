@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten.nextgen.fragments;
+package com.cbapps.kempengemeenten.fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -26,11 +26,11 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.cb.kempengemeenten.R;
 import com.cbapps.kempengemeenten.MainActivity;
-import com.cbapps.kempengemeenten.nextgen.CoordinateConverter;
-import com.cbapps.kempengemeenten.nextgen.database.LmsDatabase;
-import com.cbapps.kempengemeenten.nextgen.database.LmsPoint;
-import com.cbapps.kempengemeenten.nextgen.PermissionManager;
-import com.cbapps.kempengemeenten.nextgen.RDToWGS84Converter;
+import com.cbapps.kempengemeenten.CoordinateConverter;
+import com.cbapps.kempengemeenten.database.LmsDatabase;
+import com.cbapps.kempengemeenten.database.LmsPoint;
+import com.cbapps.kempengemeenten.PermissionManager;
+import com.cbapps.kempengemeenten.RDToWGS84Converter;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingClient;

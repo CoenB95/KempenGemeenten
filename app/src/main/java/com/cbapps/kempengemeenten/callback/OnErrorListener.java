@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten.nextgen.callback;
+package com.cbapps.kempengemeenten.callback;
 
 import android.support.annotation.Nullable;
 

@@ -7,10 +7,9 @@ import android.support.v7.preference.DialogPreference;
 import android.util.AttributeSet;
 
 import com.cb.kempengemeenten.R;
-import com.cbapps.kempengemeenten.nextgen.fragments.FileBrowserFragment;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class LocationChooserDialog extends DialogPreference {
+public class LocationPreference extends DialogPreference {
 
 	public static final int MODE_FTP_DIRECTORIES = 1;
 	public static final int MODE_FTP_FILES = 2;
@@ -20,7 +19,7 @@ public class LocationChooserDialog extends DialogPreference {
 	private String path;
 	private int browseMode;
 
-	public LocationChooserDialog(Context context, AttributeSet attrs) {
+	public LocationPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		setDialogLayoutResource(R.layout.file_browser_layout);
 		switch (attrs.getAttributeValue(null, "browseMode")) {

@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten.nextgen;
+package com.cbapps.kempengemeenten;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,9 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author CoenB95

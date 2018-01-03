@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten.nextgen;
+package com.cbapps.kempengemeenten;
 
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -10,7 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.cb.kempengemeenten.R;
-import com.cbapps.kempengemeenten.nextgen.callback.Predicate;
+import com.cbapps.kempengemeenten.callback.Predicate;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten.nextgen.database;
+package com.cbapps.kempengemeenten.database;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;

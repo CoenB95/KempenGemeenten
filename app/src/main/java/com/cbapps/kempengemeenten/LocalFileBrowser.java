@@ -1,13 +1,6 @@
-package com.cbapps.kempengemeenten.nextgen;
-
-import android.util.Log;
-
-import org.apache.commons.net.ftp.FTPConnectionClosedException;
-import org.apache.commons.net.ftp.FTPFile;
+package com.cbapps.kempengemeenten;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

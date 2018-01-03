@@ -1,51 +1,28 @@
 package com.cbapps.kempengemeenten;
 
-import android.Manifest;
 import android.annotation.TargetApi;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.PersistableBundle;
-import android.preference.PreferenceActivity;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cb.kempengemeenten.R;
-import com.cbapps.kempengemeenten.nextgen.DefaultFileInfo;
-import com.cbapps.kempengemeenten.nextgen.FTPFileBrowser;
-import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
-import com.cbapps.kempengemeenten.nextgen.FTPFileTransferer;
-import com.cbapps.kempengemeenten.nextgen.FileInfo;
-import com.cbapps.kempengemeenten.nextgen.PermissionManager;
-import com.cbapps.kempengemeenten.nextgen.database.LmsPoint;
-import com.cbapps.kempengemeenten.nextgen.fragments.FileBrowserFragment;
-import com.cbapps.kempengemeenten.nextgen.fragments.MapFragment;
-import com.cbapps.kempengemeenten.nextgen.fragments.UploadCentreFragment;
-import com.google.android.gms.maps.SupportMapFragment;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.cbapps.kempengemeenten.database.LmsPoint;
+import com.cbapps.kempengemeenten.fragments.MapFragment;
+import com.cbapps.kempengemeenten.fragments.UploadCentreFragment;
 
 public class MainActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener,
 		MapFragment.OnLmsPointSelectedListener {

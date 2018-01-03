@@ -1,29 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Kempen Gemeenten</string>
-    <string name="acra_done">Dank u wel!</string>
-    <string name="acra_text">Een onbekende fout heeft er voor gezorgd dat de app is gecrashed. Help ons met het vinden van de fout door data te verzenden.</string>
-    <string name="acra_title">Crash</string>
-    <string name="acra_toast">Er is iets niet in de haak…</string>
     <string name="action_settings">Instellingen</string>
-    <string name="blader">Bladeren</string>
-    <string name="button">Inloggen</string>
     <string name="cancel">Annuleren</string>
     <string name="description">Afbeelding</string>
     <string name="gebruiker">Gebruikersnaam</string>
     <string name="go_back">Ga terug</string>
-    <string name="hello_world">Hallo wereld!</string>
-    <string name="laden">Bezig met laden</string>
-    <string name="locatie">Lokale opslag</string>
     <string name="login">Log a.u.b. in</string>
-    <string name="opslaan">Opslaan</string>
     <string name="ok">Selecteer</string>
-    <string name="quick_locatie_invoer">Kies een bestand voor de download-knop</string>
-    <string name="quick_select">Kies een bestand</string>
-    <string name="quickdownload">Snelle Download</string>
     <string name="version">Versie</string>
     <string name="wachtwoord">Wachtwoord</string>
-    <string name="intent_auto_start">Automatisch openen…</string>
     <string name="upload">Uploaden</string>
     <string name="download">Downloaden</string>
     <string name="choose_directory">Kies een map</string>
@@ -35,4 +21,5 @@
     <string name="geofence_channel_description">Schakel notificaties in voor wanneer je een meetpunt nadert.</string>
     <string name="geofence_notification_title">Meetpunt naarbij</string>
     <string name="geofence_notification_summary">Selecteer voor details</string>
+    <string name="save">Opslaan</string>
 </resources>

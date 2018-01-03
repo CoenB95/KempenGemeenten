@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten.nextgen.fragments;
+package com.cbapps.kempengemeenten.fragments;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -7,32 +7,24 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.preference.DialogPreference;
 import android.support.v7.preference.PreferenceDialogFragmentCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.cb.kempengemeenten.R;
-import com.cbapps.kempengemeenten.LocationChooserDialog;
-import com.cbapps.kempengemeenten.nextgen.FTPFileBrowser;
-import com.cbapps.kempengemeenten.nextgen.FTPFileConnection;
-import com.cbapps.kempengemeenten.nextgen.FileBrowser;
-import com.cbapps.kempengemeenten.nextgen.FileBrowserAdapter;
-import com.cbapps.kempengemeenten.nextgen.LocalFileBrowser;
-import com.cbapps.kempengemeenten.nextgen.PermissionManager;
-
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import com.cbapps.kempengemeenten.LocationPreference;
+import com.cbapps.kempengemeenten.FTPFileBrowser;
+import com.cbapps.kempengemeenten.FTPFileConnection;
+import com.cbapps.kempengemeenten.FileBrowser;
+import com.cbapps.kempengemeenten.FileBrowserAdapter;
+import com.cbapps.kempengemeenten.LocalFileBrowser;
+import com.cbapps.kempengemeenten.PermissionManager;
 
 /**
  * @author CoenB95
@@ -59,8 +51,8 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 		return fragment;
 	}
 
-	public LocationChooserDialog getFileLocationPreference() {
-		return ((LocationChooserDialog) getPreference());
+	public LocationPreference getFileLocationPreference() {
+		return ((LocationPreference) getPreference());
 	}
 
 	@Override
