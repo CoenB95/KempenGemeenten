@@ -180,7 +180,11 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 	@Override
 	public void onLmsPointSelected(LmsPoint point) {
-		bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-		bottomSheetTitleView.setText(point.address);
+		if (point == null) {
+			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+		} else {
+			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+			bottomSheetTitleView.setText(point.address);
+		}
 	}
 }

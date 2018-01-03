@@ -44,6 +44,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 
@@ -73,8 +74,10 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	private Handler handler;
 	private GoogleMap googleMap;
 	private List<LmsPoint> points;
-	private LmsPoint shownPoint;
 	private List<Marker> markers;
+
+	private LmsPoint shownPoint;
+	private Polyline shownPolyLine;
 
 	private OnLmsPointSelectedListener listener;
 
@@ -170,7 +173,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 						.getJSONObject("overview_polyline")
 						.getString("points");
 
-				googleMap.addPolyline(new PolylineOptions()
+				shownPolyLine = googleMap.addPolyline(new PolylineOptions()
 						.addAll(PolyUtil.decode(encodedPoly))
 						.color(ContextCompat.getColor(getContext(), R.color.colorAccent)));
 			} catch (JSONException e) {
@@ -201,6 +204,9 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 						}
 						return false;
 					});
+					googleMap.setOnMapClickListener(latLng -> {
+						showLmsDetail(null);
+					});
 
 					service.submit(() -> {
 						points = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
@@ -216,14 +222,26 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 		}, Manifest.permission.ACCESS_FINE_LOCATION);
 	}
 
+	@Override
+	public void onPause() {
+		super.onPause();
+		showLmsDetail(null);
+	}
+
 	public void setLmsPointSelectedListener(OnLmsPointSelectedListener listener) {
 		this.listener = listener;
 	}
 
 	public void showLmsDetail(LmsPoint point) {
+		if (shownPolyLine != null) {
+			shownPolyLine.remove();
+			shownPolyLine = null;
+		}
 		shownPoint = point;
 		if (listener != null)
 			listener.onLmsPointSelected(point);
+		if (point == null)
+			return;
 		if (googleMap == null)
 			return;
 		googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(CONVERTER.toLatLng(point.rdX, point.rdY), 14));
