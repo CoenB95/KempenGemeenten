@@ -77,6 +77,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	private LmsPoint shownPoint;
 	private List<Marker> markers;
 	private CoordinateConverter converter;
+	private OnLmsPointSelectedListener listener;
 
 	public MapFragment() {
 		service = Executors.newCachedThreadPool();
@@ -99,7 +100,12 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
 					googleMap.setMyLocationEnabled(true);
 					googleMap.setOnMarkerClickListener(marker -> {
-						Toast.makeText(getContext(), marker.getSnippet() + " (lms " + marker.getTag() + ") clicked", Toast.LENGTH_SHORT).show();
+						for (LmsPoint p : points) {
+							if (p.getLmsNumber() == (int) marker.getTag()) {
+								showLmsDetail(p);
+								break;
+							}
+						}
 						return false;
 					});
 
@@ -160,6 +166,39 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 		}));
 	}
 
+	private static void createNotification(Context context, LmsPoint point) {
+		if (context == null)
+			return;
+
+		NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		if (manager != null) {
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+				NotificationChannel channel = new NotificationChannel(GEOFENCE_CHANNEL_ID,
+						context.getString(R.string.geofence_channel_name),
+						NotificationManager.IMPORTANCE_DEFAULT);
+				channel.setDescription(context.getString(R.string.geofence_channel_description));
+				channel.enableVibration(true);
+				manager.createNotificationChannel(channel);
+			}
+
+			Intent resultIntent = new Intent(context, MainActivity.class);
+			resultIntent.putExtra(EXTRA_SHOW_LMS_DETAIL, point);
+			TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+			stackBuilder.addParentStack(MainActivity.class);
+			stackBuilder.addNextIntent(resultIntent);
+			PendingIntent resultPendingIntent = stackBuilder
+					.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+			Notification notification = new NotificationCompat.Builder(context, GEOFENCE_CHANNEL_ID)
+					.setContentTitle(context.getString(R.string.geofence_notification_title))
+					.setContentText(context.getString(R.string.geofence_notification_summary))
+					.setContentIntent(resultPendingIntent)
+					.setSmallIcon(R.drawable.logo)
+					.build();
+			manager.notify(0, notification);
+		}
+	}
+
 	private void loadCSV(GoogleMap googleMap) {
 		service.submit(() -> {
 			points = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
@@ -187,11 +226,17 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 		});
 	}
 
+	public void setLmsPointSelectedListener(OnLmsPointSelectedListener listener) {
+		this.listener = listener;
+	}
+
 	public void showLmsDetail(LmsPoint point) {
 		shownPoint = point;
+		if (listener != null)
+			listener.onLmsPointSelected(point);
 		if (googleMap == null)
 			return;
-		googleMap.animateCamera(CameraUpdateFactory.newLatLng(converter.toLatLng(point.rdX, point.rdY)));
+		googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(converter.toLatLng(point.rdX, point.rdY), 14));
 		for (Marker marker : markers) {
 			if (marker.getTag() != null && ((int) marker.getTag()) == point.getLmsNumber()) {
 				marker.showInfoWindow();
@@ -228,34 +273,6 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 				.addGeofences(fences)
 				.build(), PendingIntent.getBroadcast(getContext(), 0, intent,
 				PendingIntent.FLAG_UPDATE_CURRENT));
-
-		NotificationManager manager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-		if (manager != null) {
-			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-				NotificationChannel channel = new NotificationChannel(GEOFENCE_CHANNEL_ID,
-						getString(R.string.geofence_channel_name),
-						NotificationManager.IMPORTANCE_DEFAULT);
-				channel.setDescription(getString(R.string.geofence_channel_description));
-				channel.enableVibration(true);
-				manager.createNotificationChannel(channel);
-			}
-
-			Intent resultIntent = new Intent(getContext(), MainActivity.class);
-			resultIntent.putExtra(EXTRA_SHOW_LMS_DETAIL, points.get(0));
-			TaskStackBuilder stackBuilder = TaskStackBuilder.create(getContext());
-			stackBuilder.addParentStack(MainActivity.class);
-			stackBuilder.addNextIntent(resultIntent);
-			PendingIntent resultPendingIntent = stackBuilder
-					.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-			Notification notification = new NotificationCompat.Builder(getContext(), GEOFENCE_CHANNEL_ID)
-					.setContentTitle(getString(R.string.geofence_notification_title))
-					.setContentText(getString(R.string.geofence_notification_summary))
-					.setContentIntent(resultPendingIntent)
-					.setSmallIcon(R.drawable.logo)
-					.build();
-			manager.notify(0, notification);
-		}
 	}
 
 	private class GeofenceTransitionBroadcastReceiver extends BroadcastReceiver {
@@ -273,27 +290,22 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 			int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
 			// Test that the reported transition was of interest.
-			if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-					geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+			if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
 
 				// Get the geofences that were triggered. A single event can trigger
 				// multiple geofences.
 				List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+				for (Geofence fence : triggeringGeofences) {
+					LmsPoint p = LmsDatabase.newInstance(getContext()).lmsDao()
+							.findByLmsNumber(Integer.parseInt(fence.getRequestId()));
 
-				// Get the transition details as a String.
-//				String geofenceTransitionDetails = getGeofenceTransitionDetails(
-//						this,
-//						geofenceTransition,
-//						triggeringGeofences
-//				);
-
-				// Send notification and log the transition details.
-//				sendNotification(geofenceTransitionDetails);
-//				Log.i(TAG, geofenceTransitionDetails);
-			} else {
-				// Log the error.
-				Log.e(TAG, "geofence_transition_invalid_type: " + geofenceTransition);
+					createNotification(getContext(), p);
+				}
 			}
 		}
+	}
+
+	public interface OnLmsPointSelectedListener {
+		void onLmsPointSelected(LmsPoint point);
 	}
 }

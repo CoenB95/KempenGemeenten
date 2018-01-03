@@ -12,6 +12,7 @@ import android.os.PersistableBundle;
 import android.preference.PreferenceActivity;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -27,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cb.kempengemeenten.R;
@@ -45,10 +47,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener {
+public class MainActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener,
+		MapFragment.OnLmsPointSelectedListener {
 
 	private static final String TAG = "MainActivity";
 
+	private BottomSheetBehavior bottomSheetBehavior;
+	private TextView bottomSheetTitleView;
+	private TextView bottomSheetTextView;
 	private DrawerLayout drawerLayout;
 	private ActionBarDrawerToggle drawerToggle;
 
@@ -59,6 +65,13 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+
+		bottomSheetTitleView = findViewById(R.id.bottom_sheet_title);
+
+		bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
+		bottomSheetBehavior.setHideable(true);
+		bottomSheetBehavior.setPeekHeight(300);
+		bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
 		drawerLayout = findViewById(R.id.drawer);
 		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
@@ -102,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 	private void showMap(LmsPoint point) {
 		MapFragment mapFragment = new MapFragment();
+		mapFragment.setLmsPointSelectedListener(this);
 		if (point != null)
 			mapFragment.showLmsDetail(point);
 		getSupportFragmentManager()
@@ -185,5 +199,11 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			drawerToggle.setDrawerIndicatorEnabled(false);
 			drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 		}
+	}
+
+	@Override
+	public void onLmsPointSelected(LmsPoint point) {
+		bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+		bottomSheetTitleView.setText(point.address);
 	}
 }
