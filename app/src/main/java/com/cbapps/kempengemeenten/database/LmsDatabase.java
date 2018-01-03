@@ -9,7 +9,7 @@ import android.content.Context;
  * @author CoenB95
  */
 
-@Database(entities = {LmsPoint.class}, version = 3)
+@Database(entities = {LmsPoint.class}, version = 5)
 public abstract class LmsDatabase extends RoomDatabase {
 
 	private static LmsDatabase instance;

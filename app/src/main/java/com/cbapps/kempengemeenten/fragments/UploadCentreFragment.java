@@ -175,8 +175,12 @@ public class UploadCentreFragment extends DialogFragment {
 													Integer.valueOf(split[1]), //x
 													Integer.valueOf(split[2]), //y
 													split[3], //town
-													split[4], //address
-													split[7]); //date
+													split[4], //street
+													Integer.valueOf(split[5]), //number
+													split[6], //appendix
+													split[7], //measured-date
+													split[8].isEmpty() ? 0 : Integer.valueOf(split[8]), //measuring duration
+													split[9]); //photos json-array
 											points.add(point);
 										}
 									} catch (NumberFormatException e) {
