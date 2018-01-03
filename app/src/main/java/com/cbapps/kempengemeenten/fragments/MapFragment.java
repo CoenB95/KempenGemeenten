@@ -217,8 +217,6 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
 					service.submit(() -> {
 						points = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
-						points.add(new LmsPoint(0, 127509, 400042, "Tilburg",
-								"De berg", 0, "", "", 0, ""));
 						handler.post(() -> {
 							createLmsMarkers(googleMap);
 							if (shownPoint != null)
