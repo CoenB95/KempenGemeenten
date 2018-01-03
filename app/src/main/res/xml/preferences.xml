@@ -3,42 +3,38 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-		android:title="Lokale opslag">
+		android:title="@string/ftp_locations">
 
         <com.cbapps.kempengemeenten.LocationPreference
-	        android:dialogTitle="@string/locatie"
+	        android:dialogTitle="@string/location_download_updates_ftp"
 			android:key="ftpDownloadLocation"
-			android:positiveButtonText="@string/opslaan"
+			android:positiveButtonText="@string/save"
 			android:negativeButtonText="@string/cancel"
-			android:title="@string/locatie"
-			android:dialogLayout="@layout/choose_preference"
+			android:title="@string/location_download_updates_ftp"
 			browseMode="ftpFiles"/>
         <com.cbapps.kempengemeenten.LocationPreference
-	        android:dialogTitle="@string/locatie"
+	        android:dialogTitle="@string/location_upload_updates_ftp"
 	        android:key="ftpUploadLocation"
 	        android:positiveButtonText="@string/save"
 	        android:negativeButtonText="@string/cancel"
-	        android:title="Test"
-	        android:dialogLayout="@layout/choose_preference"
-			browseMode="localDirectories"/>
+	        android:title="@string/location_upload_updates_ftp"
+			browseMode="ftpDirectories"/>
         
     </PreferenceCategory>
 
-
-
     <PreferenceCategory
-	    android:title="Authenticatie">
+	    android:title="@string/ftp_credentials">
 
 	    <EditTextPreference
 		    android:dialogTitle="@string/gebruiker"
-		    android:key="gebruikersnaam"
+		    android:key="ftpUsername"
 		    android:positiveButtonText="@string/save"
 		    android:negativeButtonText="@string/cancel"
 		    android:title="@string/gebruiker" />
 
 	    <EditTextPreference
 		    android:dialogTitle="@string/wachtwoord"
-		    android:key="wachtwoord"
+		    android:key="ftpPassword"
 		    android:positiveButtonText="@string/save"
 		    android:negativeButtonText="@string/cancel"
 		    android:title="@string/wachtwoord"
@@ -46,15 +42,15 @@
     </PreferenceCategory>
 
 	<PreferenceCategory
-		android:title="Over">
+		android:title="@string/about">
 
         <Preference
 	        android:title="@string/app_name"
 	        android:summary="@string/copyright"/>
         <Preference
 			android:key="version_code"
-	        android:title="Build"
-	        android:summary="%s"/>
+	        android:title="@string/version"
+	        android:summary="@string/version_code"/>
     </PreferenceCategory>
     
 </PreferenceScreen>

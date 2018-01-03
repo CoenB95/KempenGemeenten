@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Kempen Gemeenten</string>
+    <string name="app_name">Kempengemeenten</string>
     <string name="action_settings">Instellingen</string>
     <string name="cancel">Annuleren</string>
     <string name="description">Afbeelding</string>
@@ -22,4 +22,11 @@
     <string name="geofence_notification_title">Meetpunt naarbij</string>
     <string name="geofence_notification_summary">Selecteer voor details</string>
     <string name="save">Opslaan</string>
+    <string name="location_download_updates_ftp">Updatebestand download-locatie</string>
+    <string name="location_upload_photos_ftp">Foto\'s uploadmap</string>
+    <string name="location_upload_updates_ftp">Updatebestand uploadmap</string>
+    <string name="ftp_credentials">FTP Login-gegevens</string>
+    <string name="ftp_locations">FTP locaties</string>
+    <string name="about">Over</string>
+    <string name="location">Locatie</string>
 </resources>
