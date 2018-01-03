@@ -41,6 +41,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -90,11 +91,13 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	private void createLmsMarkers(GoogleMap googleMap) {
 		markers = new ArrayList<>();
 		for (LmsPoint point : points) {
-			LatLng test = CONVERTER.toLatLng(point.rdX, point.rdY);
+			LatLng test = CONVERTER.toLatLng(point.getRdX(), point.getRdY());
 			Marker marker = googleMap.addMarker(new MarkerOptions()
 					.position(test)
-					.title(point.town)
-					.snippet(point.address));
+					.icon(BitmapDescriptorFactory.defaultMarker(point.isMeasured() ?
+							BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_RED))
+					.title(point.getAddress())
+					.snippet(point.getTown()));
 			marker.setTag(point.getLmsNumber());
 			markers.add(marker);
 		}
@@ -157,7 +160,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 			return;
 		}
 
-		LatLng latLng = CONVERTER.toLatLng(point.rdX, point.rdY);
+		LatLng latLng = CONVERTER.toLatLng(point.getRdX(), point.getRdY());
 		String apiKey = getString(R.string.google_maps_key);
 		RequestQueue queue = Volley.newRequestQueue(getContext());
 		queue.add(new JsonObjectRequest(Request.Method.GET,
@@ -244,7 +247,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 			return;
 		if (googleMap == null)
 			return;
-		googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(CONVERTER.toLatLng(point.rdX, point.rdY), 14));
+		googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(CONVERTER.toLatLng(point.getRdX(), point.getRdY()), 14));
 		for (Marker marker : markers) {
 			if (marker.getTag() != null && ((int) marker.getTag()) == point.getLmsNumber()) {
 				marker.showInfoWindow();
@@ -265,7 +268,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
 		List<Geofence> fences = new ArrayList<>();
 		for (LmsPoint point : points) {
-			LatLng latLng = CONVERTER.toLatLng(point.rdX, point.rdY);
+			LatLng latLng = CONVERTER.toLatLng(point.getRdX(), point.getRdY());
 			fences.add(new Geofence.Builder()
 					.setRequestId(String.valueOf(point.getLmsNumber()))
 					.setCircularRegion(latLng.latitude, latLng.longitude, GEOFENCE_RADIUS)

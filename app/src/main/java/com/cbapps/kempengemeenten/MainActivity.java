@@ -17,12 +17,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.cb.kempengemeenten.R;
 import com.cbapps.kempengemeenten.database.LmsPoint;
 import com.cbapps.kempengemeenten.fragments.MapFragment;
 import com.cbapps.kempengemeenten.fragments.UploadCentreFragment;
+import com.jakewharton.threetenabp.AndroidThreeTen;
 
 public class MainActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener,
 		MapFragment.OnLmsPointSelectedListener {
@@ -30,8 +32,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	private static final String TAG = "MainActivity";
 
 	private BottomSheetBehavior bottomSheetBehavior;
-	private TextView bottomSheetTitleView;
-	private TextView bottomSheetTextView;
+	private TextView bottomSheetTownView;
+	private TextView bottomSheetStreetView;
+	private Switch bottomSheetMeasuredSwitch;
 	private DrawerLayout drawerLayout;
 	private ActionBarDrawerToggle drawerToggle;
 
@@ -39,11 +42,14 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_layout);
+		AndroidThreeTen.init(getBaseContext());
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
-		bottomSheetTitleView = findViewById(R.id.bottom_sheet_title);
+		bottomSheetTownView = findViewById(R.id.pointTown);
+		bottomSheetStreetView = findViewById(R.id.pointStreet);
+		bottomSheetMeasuredSwitch = findViewById(R.id.pointMeasuredSwitch);
 
 		bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
 		bottomSheetBehavior.setHideable(true);
@@ -184,7 +190,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 		} else {
 			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-			bottomSheetTitleView.setText(point.address);
+			bottomSheetStreetView.setText(point.getAddress());
+			bottomSheetTownView.setText(point.getTown());
+			bottomSheetMeasuredSwitch.setChecked(point.isMeasured());
 		}
 	}
 }

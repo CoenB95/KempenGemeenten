@@ -29,4 +29,5 @@
     <string name="ftp_locations">FTP locaties</string>
     <string name="about">Over</string>
     <string name="location">Locatie</string>
+    <string name="measured">Gemeten</string>
 </resources>

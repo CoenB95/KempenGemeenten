@@ -30,6 +30,8 @@ import com.cbapps.kempengemeenten.callback.Predicate;
 import com.cbapps.kempengemeenten.database.LmsDatabase;
 import com.cbapps.kempengemeenten.database.LmsPoint;
 
+import org.threeten.bp.LocalDateTime;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -173,7 +175,8 @@ public class UploadCentreFragment extends DialogFragment {
 													Integer.valueOf(split[1]), //x
 													Integer.valueOf(split[2]), //y
 													split[3], //town
-													split[4]); //address
+													split[4], //address
+													split[7]); //date
 											points.add(point);
 										}
 									} catch (NumberFormatException e) {
