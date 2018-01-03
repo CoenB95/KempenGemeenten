@@ -30,4 +30,7 @@
     <string name="about">Over</string>
     <string name="location">Locatie</string>
     <string name="measured">Gemeten</string>
+	<string name="google_location_required_title">Google\'s Locatie Services benodigd</string>
+    <string name="google_location_required_ok">Breng mij daar</string>
+    <string name="google_location_required_description">Om dichtbij-notificaties te laten werken, dient Google\'s Locatie Services aan te staan.</string>
 </resources>

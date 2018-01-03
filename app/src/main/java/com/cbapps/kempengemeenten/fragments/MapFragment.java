@@ -13,10 +13,12 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -69,9 +71,11 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	private static final CoordinateConverter CONVERTER = new RDToWGS84Converter();
 
 	/**The default geofencing radius in meters.*/
-	private static final int GEOFENCE_RADIUS = 100;
+	private static final int GEOFENCE_RADIUS = 500;
+	/**The expiration time of geofences in miliseconds.*/
+	private static final int GEOFENCE_EXPIRATION = 12 * 3600 * 1000;
 
-	private ExecutorService service;
+	private static ExecutorService service;
 	private Handler handler;
 	private GoogleMap googleMap;
 	private List<LmsPoint> points;
@@ -213,6 +217,8 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
 					service.submit(() -> {
 						points = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
+						points.add(new LmsPoint(0, 127509, 400042, "Tilburg",
+								"De berg", 0, "", "", 0, ""));
 						handler.post(() -> {
 							createLmsMarkers(googleMap);
 							if (shownPoint != null)
@@ -273,7 +279,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 					.setRequestId(String.valueOf(point.getLmsNumber()))
 					.setCircularRegion(latLng.latitude, latLng.longitude, GEOFENCE_RADIUS)
 					.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-					.setExpirationDuration(300_000)
+					.setExpirationDuration(GEOFENCE_EXPIRATION)
 					.build());
 		}
 
@@ -283,18 +289,32 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 		Intent intent = new Intent(context, GeofenceTransitionBroadcastReceiver.class);
 		geofencingClient.addGeofences(new GeofencingRequest.Builder()
 				.addGeofences(fences)
+				.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
 				.build(), PendingIntent.getBroadcast(context, 0, intent,
-				PendingIntent.FLAG_UPDATE_CURRENT));
+				PendingIntent.FLAG_UPDATE_CURRENT))
+				.addOnFailureListener(runnable -> {
+					new AlertDialog.Builder(context)
+							.setTitle(R.string.google_location_required_title)
+							.setMessage(R.string.google_location_required_description)
+							.setPositiveButton(R.string.google_location_required_ok, (dialogInterface, i) -> {
+								context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+							})
+							.setNegativeButton(R.string.cancel, null)
+							.show();
+				});
 	}
 
-	private static class GeofenceTransitionBroadcastReceiver extends BroadcastReceiver {
+	public static class GeofenceTransitionBroadcastReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 			if (geofencingEvent.hasError()) {
 				String errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode());
-				Log.e(TAG, errorMessage);
+				new AlertDialog.Builder(context)
+						.setTitle("Error")
+						.setMessage(errorMessage)
+						.show();
 				return;
 			}
 
@@ -307,12 +327,16 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 				// Get the geofences that were triggered. A single event can trigger
 				// multiple geofences.
 				List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-				for (Geofence fence : triggeringGeofences) {
-					LmsPoint p = LmsDatabase.newInstance(context).lmsDao()
-							.findByLmsNumber(Integer.parseInt(fence.getRequestId()));
+				if (service == null)
+					return;
+				service.submit(() -> {
+					for (Geofence fence : triggeringGeofences) {
+						LmsPoint p = LmsDatabase.newInstance(context).lmsDao()
+								.findByLmsNumber(Integer.parseInt(fence.getRequestId()));
 
-					createNotification(context, p);
-				}
+						createNotification(context, p);
+					}
+				});
 			}
 		}
 	}
