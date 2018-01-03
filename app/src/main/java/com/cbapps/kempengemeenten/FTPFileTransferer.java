@@ -137,12 +137,12 @@ public class FTPFileTransferer {
 		});
 	}
 
-	public Future<FileInfo> uploadFile(FileInfo localFileInfo, FileInfo remoteFileInfo,
+	public Future<FileInfo> uploadFile(FileInfo localFileInfo, FileInfo remoteDirectoryInfo,
 	                                     OnSuccessListener<FileInfo> successListener,
 	                                     OnProgressUpdateListener<FileInfo> updateListener,
 	                                     OnErrorListener errorListener) {
 		return service.submit(() -> {
-			if (remoteFileInfo == null || localFileInfo == null) {
+			if (remoteDirectoryInfo == null || localFileInfo == null) {
 				if (errorListener != null)
 					errorListener.onError("Input and/or output file not specified.");
 				return null;
@@ -163,24 +163,26 @@ public class FTPFileTransferer {
 			try {
 				long fileSize = localFileInfo.getSize();
 				connection.getClient().setFileType(FTP.BINARY_FILE_TYPE);
+				connection.getClient().setFileTransferMode(FTP.BINARY_FILE_TYPE);
 				connection.getClient().setCopyStreamListener(new CopyStreamAdapter() {
 					@Override
 					public void bytesTransferred(long totalBytesTransferred, int bytesTransferred, long streamSize) {
 						if (updateListener != null)
-							updateListener.onProgressUpdate(remoteFileInfo, (double) totalBytesTransferred / fileSize);
+							updateListener.onProgressUpdate(localFileInfo, (double) totalBytesTransferred / fileSize);
 					}
 				});
 
 				InputStream inputStream = new FileInputStream(inputFile);
-				boolean success = connection.getClient().storeFile(remoteFileInfo.getPath(), inputStream);
+				boolean success = connection.getClient().storeFile(remoteDirectoryInfo.getPath() +
+						"/" + localFileInfo.getName(), inputStream);
 
 				connection.getClient().setCopyStreamListener(null);
 				inputStream.close();
 
 				if (success) {
 					if (successListener != null)
-						successListener.onSuccess(remoteFileInfo);
-					return remoteFileInfo;
+						successListener.onSuccess(localFileInfo);
+					return remoteDirectoryInfo;
 				} else {
 					if (errorListener != null)
 						errorListener.onError("Bad reply: " + connection.getClient().getReplyString());

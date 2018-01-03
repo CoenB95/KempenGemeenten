@@ -7,7 +7,7 @@
     <string name="gebruiker">Username</string>
     <string name="login">Please login</string>
     <string name="cancel">Cancel</string>
-    <string name="ok">Selecteer</string>
+    <string name="ok">OK</string>
     <string name="description">Picture</string>
     <string name="go_back">Go back</string>
     <string name="copyright" translatable="false">©2018 CB Apps</string>
@@ -25,16 +25,20 @@
     <string name="geofence_notification_summary">Select for details</string>
     <string name="save">Save</string>
     <string name="location_download_updates_ftp">Updatefile download-location</string>
-    <string name="location_upload_photos_ftp">Photos upload-directory</string>
+    <string name="location_upload_photos_ftp">Photo\'s upload directory</string>
     <string name="location_upload_updates_ftp">Updatefile upload-directory</string>
     <string name="ftp_locations">FTP locations</string>
     <string name="ftp_credentials">FTP Credentials</string>
-    <string name="version_code">2.0</string>
+    <string name="version_code" translatable="false">2.0</string>
     <string name="about">About</string>
     <string name="location">Location</string>
     <string name="measured">Measured</string>
 	<string name="google_location_required_title">Google\'s Location Services required</string>
     <string name="google_location_required_description">In order for nearby-notifications to work, Google\'s Location Services needs to be enabled.</string>
     <string name="google_location_required_ok">Take me there</string>
+	<string name="upload_photos">Take a picture</string>
+	<string name="location_not_set_title">Location not set</string>
+    <string name="location_not_set_description">One or more location preferences are not yet set. Please set them using the Settings menu item.</string>
+	<string name="local_locations">Local locations</string>
 
 </resources>

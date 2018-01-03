@@ -1,6 +1,7 @@
 package com.cbapps.kempengemeenten;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,13 +16,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Switch;
-import android.widget.TextView;
 
 import com.cb.kempengemeenten.R;
 import com.cbapps.kempengemeenten.database.LmsPoint;
+import com.cbapps.kempengemeenten.fragments.LmsDetailFragment;
 import com.cbapps.kempengemeenten.fragments.MapFragment;
 import com.cbapps.kempengemeenten.fragments.UploadCentreFragment;
 import com.jakewharton.threetenabp.AndroidThreeTen;
@@ -31,10 +32,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 	private static final String TAG = "MainActivity";
 
+	private LmsDetailFragment detailFragment;
+
 	private BottomSheetBehavior bottomSheetBehavior;
-	private TextView bottomSheetTownView;
-	private TextView bottomSheetStreetView;
-	private Switch bottomSheetMeasuredSwitch;
 	private DrawerLayout drawerLayout;
 	private ActionBarDrawerToggle drawerToggle;
 
@@ -46,10 +46,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-
-		bottomSheetTownView = findViewById(R.id.pointTown);
-		bottomSheetStreetView = findViewById(R.id.pointStreet);
-		bottomSheetMeasuredSwitch = findViewById(R.id.pointMeasuredSwitch);
 
 		bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
 		bottomSheetBehavior.setHideable(true);
@@ -69,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 					showMap(null);
 					return true;
 				case R.id.home:
-					showButtons();
+					showUploadCentre();
 					return true;
 			}
 			return false;
@@ -81,6 +77,14 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 		PermissionManager.setup();
 
+		detailFragment = (LmsDetailFragment) getSupportFragmentManager().findFragmentByTag("Detail");
+		if (detailFragment == null)
+			detailFragment = new LmsDetailFragment();
+		getSupportFragmentManager()
+				.beginTransaction()
+				.replace(R.id.bottom_sheet_frame, detailFragment, "Detail")
+				.commit();
+
 		LmsPoint point = (LmsPoint) getIntent().getSerializableExtra(MapFragment.EXTRA_SHOW_LMS_DETAIL);
 		if (point != null)
 			showMap(point);
@@ -88,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			showMap(null);
 	}
 
-	private void showButtons() {
+	private void showUploadCentre() {
 		UploadCentreFragment uploadCentreFragment = new UploadCentreFragment();
 		getSupportFragmentManager()
 				.beginTransaction()
@@ -105,6 +109,14 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 				.beginTransaction()
 				.replace(R.id.content, mapFragment, "Map")
 				.commit();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == LmsDetailFragment.CAPTURE_REQUEST_CODE) {
+			Log.d(TAG, "And now...");
+		}
 	}
 
 	@Override
@@ -190,9 +202,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 		} else {
 			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-			bottomSheetStreetView.setText(point.getAddress());
-			bottomSheetTownView.setText(point.getTown());
-			bottomSheetMeasuredSwitch.setChecked(point.isMeasured());
+			detailFragment.showDetail(point);
 		}
 	}
 }

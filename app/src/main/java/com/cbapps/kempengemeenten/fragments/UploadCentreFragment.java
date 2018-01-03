@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -114,11 +115,17 @@ public class UploadCentreFragment extends DialogFragment {
 				if (result.getPermission().equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
 					if (result.isGranted()) {
 						Log.d(TAG, "Storage reading granted.");
-						String localDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+						String localDirectory = preferences.getString("localUploadLocation", null);
 						String remoteDirectoryName = preferences.getString("ftpUploadLocation", null);
-						if (remoteDirectoryName != null) {
-							uploadFiles(localDirectory, remoteDirectoryName);
+						if (localDirectory == null || remoteDirectoryName == null) {
+							new AlertDialog.Builder(getContext())
+									.setTitle(R.string.location_not_set_title)
+									.setMessage(R.string.location_not_set_description)
+									.setPositiveButton(R.string.ok, null)
+									.show();
+							return;
 						}
+						uploadFiles(localDirectory, remoteDirectoryName);
 					} else
 						Log.d(TAG, "Storage reading denied.");
 				} else

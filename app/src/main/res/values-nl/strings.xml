@@ -7,7 +7,7 @@
     <string name="gebruiker">Gebruikersnaam</string>
     <string name="go_back">Ga terug</string>
     <string name="login">Log a.u.b. in</string>
-    <string name="ok">Selecteer</string>
+    <string name="ok">Ok</string>
     <string name="version">Versie</string>
     <string name="wachtwoord">Wachtwoord</string>
     <string name="upload">Uploaden</string>
@@ -26,11 +26,15 @@
     <string name="location_upload_photos_ftp">Foto\'s uploadmap</string>
     <string name="location_upload_updates_ftp">Updatebestand uploadmap</string>
     <string name="ftp_credentials">FTP Login-gegevens</string>
-    <string name="ftp_locations">FTP locaties</string>
+    <string name="ftp_locations">FTP opslaglocaties</string>
     <string name="about">Over</string>
     <string name="location">Locatie</string>
     <string name="measured">Gemeten</string>
 	<string name="google_location_required_title">Google\'s Locatie Services benodigd</string>
     <string name="google_location_required_ok">Breng mij daar</string>
     <string name="google_location_required_description">Om dichtbij-notificaties te laten werken, dient Google\'s Locatie Services aan te staan.</string>
+	<string name="upload_photos">Maak een foto</string>
+	<string name="location_not_set_title">Locatie niet bekend</string>
+    <string name="location_not_set_description">Eén of meer locatie voorkeuren zijn nog niet ingevuld. Ga a.u.b. naar instellingen en pas de benodigde voorkeuren aan.</string>
+	<string name="local_locations">Lokale opslaglocaties</string>
 </resources>
