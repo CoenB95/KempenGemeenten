@@ -52,6 +52,8 @@ public class LmsDetailFragment extends DialogFragment {
 		pointStreetView = view.findViewById(R.id.pointStreet);
 		pointMeasuredSwitch = view.findViewById(R.id.pointMeasuredSwitch);
 
+		if (shownPoint != null)
+			showDetail(shownPoint);
 //		Button pointCaptureButton = view.findViewById(R.id.pointUploadButton);
 //		pointCaptureButton.setOnClickListener(v -> {
 //			String storageDir = preferences.getString("localUploadLocation", null);
@@ -80,6 +82,8 @@ public class LmsDetailFragment extends DialogFragment {
 
 	public void showDetail(LmsPoint point) {
 		shownPoint = point;
+		if (pointTownView == null || pointStreetView == null)
+			return;
 		pointStreetView.setText(point.getAddress());
 		pointTownView.setText(point.getTown());
 		pointMeasuredSwitch.setChecked(point.isMeasured());

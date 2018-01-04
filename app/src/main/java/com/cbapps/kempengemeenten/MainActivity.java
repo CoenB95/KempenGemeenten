@@ -33,6 +33,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	private static final String TAG = "MainActivity";
 
 	private LmsDetailFragment detailFragment;
+	private UploadCentreFragment uploadCentreFragment;
+	private String shownMainFragmentTag;
+	private LmsPoint shownLmsPoint;
 
 	private BottomSheetBehavior bottomSheetBehavior;
 	private DrawerLayout drawerLayout;
@@ -62,10 +65,11 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			drawerLayout.closeDrawers();
 			switch (item.getItemId()) {
 				case R.id.map:
-					showMap(null);
+					setMainFragment(new MapFragment(), "Map");
 					return true;
 				case R.id.home:
-					showUploadCentre();
+					bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+					setMainFragment(uploadCentreFragment, "UploadCentre");
 					return true;
 			}
 			return false;
@@ -78,36 +82,48 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 		PermissionManager.setup();
 
 		detailFragment = (LmsDetailFragment) getSupportFragmentManager().findFragmentByTag("Detail");
+		MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentByTag("Map");
+		uploadCentreFragment = (UploadCentreFragment) getSupportFragmentManager().findFragmentByTag("UploadCentre");
+
 		if (detailFragment == null)
 			detailFragment = new LmsDetailFragment();
-		getSupportFragmentManager()
-				.beginTransaction()
-				.replace(R.id.bottom_sheet_frame, detailFragment, "Detail")
-				.commit();
 
-		LmsPoint point = (LmsPoint) getIntent().getSerializableExtra(MapFragment.EXTRA_SHOW_LMS_DETAIL);
-		if (point != null)
-			showMap(point);
-		else if (savedInstanceState == null)
-			showMap(null);
-	}
+		if (mapFragment == null) {
+			mapFragment = new MapFragment();
+			setMainFragment(mapFragment, "Map");
+		}
 
-	private void showUploadCentre() {
-		UploadCentreFragment uploadCentreFragment = new UploadCentreFragment();
-		getSupportFragmentManager()
-				.beginTransaction()
-				.replace(R.id.content, uploadCentreFragment, "UploadCentre")
-				.commit();
-	}
+		if (uploadCentreFragment == null) {
+			uploadCentreFragment = new UploadCentreFragment();
+			setDetailFragment(detailFragment);
+		}
 
-	private void showMap(LmsPoint point) {
-		MapFragment mapFragment = new MapFragment();
 		mapFragment.setLmsPointSelectedListener(this);
-		if (point != null)
-			mapFragment.showLmsDetail(point);
+
+		shownLmsPoint = (LmsPoint) getIntent().getSerializableExtra(MapFragment.EXTRA_SHOW_LMS_DETAIL);
+		if (shownLmsPoint != null)
+			mapFragment.showLmsDetail(shownLmsPoint);
+		else if (savedInstanceState != null) {
+			shownLmsPoint = (LmsPoint) savedInstanceState.getSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL);
+			if (shownLmsPoint != null)
+				mapFragment.showLmsDetail(shownLmsPoint);
+		}
+	}
+
+	private void setDetailFragment(Fragment fragment) {
 		getSupportFragmentManager()
 				.beginTransaction()
-				.replace(R.id.content, mapFragment, "Map")
+				.replace(R.id.bottom_sheet_frame, fragment, "Detail")
+				.commit();
+	}
+
+	private void setMainFragment(Fragment fragment, String tag) {
+		if (shownMainFragmentTag != null && shownMainFragmentTag.equals(tag))
+			return;
+		shownMainFragmentTag = tag;
+		getSupportFragmentManager()
+				.beginTransaction()
+				.replace(R.id.content, fragment, tag)
 				.commit();
 	}
 
@@ -184,7 +200,11 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 				//Fall through to super.
 				break;
 		}
-		super.onBackPressed();
+		if (!shownMainFragmentTag.equals("Map")) {
+			setMainFragment(new MapFragment(), "Map");
+		} else {
+			super.onBackPressed();
+		}
 	}
 
 	@Override
@@ -212,7 +232,14 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	}
 
 	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL, shownLmsPoint);
+	}
+
+	@Override
 	public void onLmsPointSelected(LmsPoint point) {
+		shownLmsPoint = point;
 		if (point == null) {
 			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 		} else {

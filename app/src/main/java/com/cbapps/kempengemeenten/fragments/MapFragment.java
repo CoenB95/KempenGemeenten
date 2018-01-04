@@ -229,12 +229,6 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 		}, Manifest.permission.ACCESS_FINE_LOCATION);
 	}
 
-	@Override
-	public void onPause() {
-		super.onPause();
-		showLmsDetail(null);
-	}
-
 	public void setLmsPointSelectedListener(OnLmsPointSelectedListener listener) {
 		this.listener = listener;
 	}
