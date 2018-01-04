@@ -39,18 +39,18 @@
 	    android:title="@string/ftp_credentials">
 
 	    <EditTextPreference
-		    android:dialogTitle="@string/gebruiker"
+		    android:dialogTitle="@string/username"
 		    android:key="ftpUsername"
 		    android:positiveButtonText="@string/save"
 		    android:negativeButtonText="@string/cancel"
-		    android:title="@string/gebruiker" />
+		    android:title="@string/username" />
 
 	    <EditTextPreference
-		    android:dialogTitle="@string/wachtwoord"
+		    android:dialogTitle="@string/password"
 		    android:key="ftpPassword"
 		    android:positiveButtonText="@string/save"
 		    android:negativeButtonText="@string/cancel"
-		    android:title="@string/wachtwoord"
+		    android:title="@string/password"
 		    android:inputType="textPassword" />
     </PreferenceCategory>
 

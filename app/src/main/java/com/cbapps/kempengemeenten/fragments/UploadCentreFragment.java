@@ -33,8 +33,6 @@ import com.cbapps.kempengemeenten.callback.Predicate;
 import com.cbapps.kempengemeenten.database.LmsDatabase;
 import com.cbapps.kempengemeenten.database.LmsPoint;
 
-import org.threeten.bp.LocalDateTime;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -144,6 +142,12 @@ public class UploadCentreFragment extends DialogFragment {
 		});
 	}
 
+	private void setStatus(String text) {
+		handler.post(() -> {
+			statusTextView.setText(text);
+		});
+	}
+
 	private void startFTP() {
 		connection = FTPFileConnection.getConnection();
 		ftpFileBrowser = new FTPFileBrowser(connection);
@@ -162,6 +166,7 @@ public class UploadCentreFragment extends DialogFragment {
 
 	private void downloadToDoFile(String remoteFileName, String localFileName) {
 		Log.i(TAG, "Downloading todo list...");
+		setStatus("");
 		ftpFileBrowser.moveIntoDirectory(remoteFileName, result -> {
 					try {
 						File tempFile = File.createTempFile("mutations", ".csv", getContext().getCacheDir());
@@ -197,10 +202,10 @@ public class UploadCentreFragment extends DialogFragment {
 										}
 
 										LmsDatabase.newInstance(getContext()).lmsDao().insertOrReplaceAll(points);
-										setStatus(R.string.status_updates_download_succeeded);
+										setStatus(R.string.updatefile_succeeded);
 									} catch (NumberFormatException e) {
 										Log.e(TAG, "Could not parse csv.");
-										setStatus(R.string.status_updates_download_csv_wrong);
+										setStatus(R.string.updatefile_csv_wrong);
 									} catch (FileNotFoundException e) {
 										e.printStackTrace();
 									} catch (IOException e) {
@@ -211,9 +216,8 @@ public class UploadCentreFragment extends DialogFragment {
 										Log.d(TAG, String.format("Downloading '%s': %.1f%%",
 												info.getName(), progress * 100)),
 								(info, error) -> {
-									Log.e(TAG, String.format("Error downloading '%s': %s." +
-													" Temp-file deleted=%b",
-											result.getName(), error, tempFile.delete()));
+									setStatus(String.format("%s: %s",
+											getString(R.string.updatefile_error), error));
 								});
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -224,6 +228,7 @@ public class UploadCentreFragment extends DialogFragment {
 
 	private void uploadFiles(String localDirectoryName, String remoteDirectoryName) {
 		Log.i(TAG, "Uploading files...");
+		setStatus("");
 		localFileBrowser.moveIntoDirectory(localDirectoryName, result -> {
 			localFileBrowser.listFiles(result1 -> {
 				Predicate<FileInfo> filter = f ->

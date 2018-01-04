@@ -1,6 +1,9 @@
 package com.cbapps.kempengemeenten;
 
+import android.support.annotation.StringRes;
 import android.util.Log;
+
+import com.cb.kempengemeenten.R;
 
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.ftp.FTPFile;
@@ -18,7 +21,7 @@ public class FTPFileBrowser extends FileBrowser {
 	private static final String TAG = "FTPFileBrowser";
 
 	private FTPFileConnection connection;
-	private String error;
+	private @StringRes int error;
 
 	public FTPFileBrowser(FTPFileConnection connection) {
 		this.connection = connection;
@@ -26,7 +29,7 @@ public class FTPFileBrowser extends FileBrowser {
 
 	@Override
 	protected boolean changeDirectory(String subDirName) {
-		error = null;
+		error = -1;
 		try {
 			if (!connection.getClient().isConnected())
 				connection.connect();
@@ -38,7 +41,7 @@ public class FTPFileBrowser extends FileBrowser {
 			if (connection.connect())
 				return changeDirectory(subDirName);
 			else {
-				error = "Connection closed.";
+				error = R.string.error_ftp_connection_closed;
 				return false;
 			}
 		} catch (IOException e) {
@@ -48,12 +51,13 @@ public class FTPFileBrowser extends FileBrowser {
 	}
 
 	@Override
-	protected String getError() {
+	protected @StringRes int getError() {
 		return error;
 	}
 
 	@Override
 	protected List<FileInfo> listFiles(String remoteDirectoryName) {
+		error = -1;
 		try {
 			if (!connection.getClient().isConnected())
 				connection.connect();
@@ -68,11 +72,11 @@ public class FTPFileBrowser extends FileBrowser {
 			if (connection.connect())
 				return listFiles(remoteDirectoryName);
 			else {
-				error = "Connection closed.";
+				error = connection.getError();
 				return null;
 			}
 		} catch (IOException e) {
-			error = "IOException: " + e.getMessage();
+			error = R.string.error_unknown_exception;
 			return null;
 		}
 	}

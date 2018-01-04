@@ -3,8 +3,8 @@
 
     <string name="app_name">Kempengemeenten</string>
     <string name="action_settings">Settings</string>
-    <string name="wachtwoord">Password</string>
-    <string name="gebruiker">Username</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
     <string name="login">Please login</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
@@ -12,8 +12,8 @@
     <string name="go_back">Go back</string>
     <string name="copyright" translatable="false">©2018 CB Apps</string>
     <string name="version">Version</string>
-    <string name="upload">Upload</string>
-    <string name="download">Download</string>
+    <string name="upload">Upload photo\'s</string>
+    <string name="download">Download updatefile</string>
     <string name="choose_directory">Choose a directory</string>
     <string name="home">Home</string>
     <string name="drawer_open">Open drawer</string>
@@ -40,7 +40,15 @@
 	<string name="location_not_set_title">Location not set</string>
     <string name="location_not_set_description">One or more location preferences are not yet set. Please set them using the Settings menu item.</string>
 	<string name="local_locations">Local locations</string>
-	<string name="status_updates_download_succeeded">Successfully updated measuring points</string>
-    <string name="status_updates_download_csv_wrong">Error: the updatefile contained unexpected data</string>
+	<string name="updatefile_succeeded">Successfully updated measuring points</string>
+    <string name="updatefile_csv_wrong">Error: the updatefile contained unexpected data</string>
+    <string name="updatefile_error">Error while fetching updatefile</string>
+    <string name="error_ftp_connection_closed">FTP connection closed</string>
+    <string name="error_ftp_credentials_wrong">Username or password incorrect</string>
+    <string name="error_unknown_exception">Unknown problem</string>
+	<string name="error_directory_is_file">One of the locations is set as a file instead of a directory</string>
+	<string name="error_file_not_found">File not found</string>
+    <string name="error_ftp_bad_reply">The server responded with a negative code</string>
+    <string name="error_file_is_directory">One of the location is set as a directory instead of a file</string>
 
 </resources>

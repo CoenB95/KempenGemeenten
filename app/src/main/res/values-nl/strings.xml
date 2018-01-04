@@ -4,14 +4,14 @@
     <string name="action_settings">Instellingen</string>
     <string name="cancel">Annuleren</string>
     <string name="description">Afbeelding</string>
-    <string name="gebruiker">Gebruikersnaam</string>
+    <string name="username">Gebruikersnaam</string>
     <string name="go_back">Ga terug</string>
     <string name="login">Log a.u.b. in</string>
     <string name="ok">Ok</string>
     <string name="version">Versie</string>
-    <string name="wachtwoord">Wachtwoord</string>
-    <string name="upload">Uploaden</string>
-    <string name="download">Downloaden</string>
+    <string name="password">Wachtwoord</string>
+    <string name="upload">Foto\'s uploaden</string>
+    <string name="download">Updatebestand downloaden</string>
     <string name="choose_directory">Kies een map</string>
     <string name="home">Start</string>
     <string name="drawer_open">Open drawer</string>
@@ -37,6 +37,14 @@
 	<string name="location_not_set_title">Locatie niet bekend</string>
     <string name="location_not_set_description">Eén of meer locatie voorkeuren zijn nog niet ingevuld. Ga a.u.b. naar instellingen en pas de benodigde voorkeuren aan.</string>
 	<string name="local_locations">Lokale opslaglocaties</string>
-	<string name="status_updates_download_succeeded">Meetpunten succesvol geüpdated</string>
-    <string name="status_updates_download_csv_wrong">Fout: het updatebestand bevatte onvoorziene data</string>
+	<string name="updatefile_succeeded">Meetpunten succesvol geüpdated</string>
+    <string name="updatefile_csv_wrong">Fout: het updatebestand bevatte onvoorziene data</string>
+    <string name="updatefile_error">Fout tijdens het ophalen van het updatebestand</string>
+    <string name="error_ftp_connection_closed">FTP verbinding gesloten</string>
+    <string name="error_ftp_credentials_wrong">Gebruikersnaam of wachtwoord incorrect</string>
+    <string name="error_unknown_exception">Onbekend probleem</string>
+	<string name="error_directory_is_file">Een der locaties is ingesteld als een bestand in plaats van een map</string>
+	<string name="error_file_not_found">Bestand niet gevonden</string>
+    <string name="error_ftp_bad_reply">De server gaf een negatief antwoord</string>
+    <string name="error_file_is_directory">Een der locaties is ingesteld als een map in plaats van een bestand</string>
 </resources>

@@ -12,7 +12,7 @@ public class LocalFileBrowser extends FileBrowser {
 
 	private static final String TAG = "LocalFileBrowser";
 
-	private String error;
+	private int error;
 
 	@Override
 	protected boolean changeDirectory(String subDirName) {
@@ -21,7 +21,7 @@ public class LocalFileBrowser extends FileBrowser {
 	}
 
 	@Override
-	protected String getError() {
+	protected int getError() {
 		return error;
 	}
 

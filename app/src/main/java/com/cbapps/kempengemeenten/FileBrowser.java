@@ -1,5 +1,7 @@
 package com.cbapps.kempengemeenten;
 
+import android.support.annotation.StringRes;
+
 import com.cbapps.kempengemeenten.callback.OnErrorListener;
 import com.cbapps.kempengemeenten.callback.OnProgressUpdateListener;
 import com.cbapps.kempengemeenten.callback.OnSuccessListener;
@@ -30,7 +32,7 @@ public abstract class FileBrowser {
 		return currentFile;
 	}
 
-	protected abstract String getError();
+	protected abstract @StringRes int getError();
 
 	protected OnProgressUpdateListener getProgressListener() {
 		return progressListener;
@@ -46,7 +48,7 @@ public abstract class FileBrowser {
 						successListener.onSuccess(fileInfos);
 				} else {
 					if (errorListener != null)
-						errorListener.onError("Error listing files: " + getError());
+						errorListener.onError(getError());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -65,7 +67,7 @@ public abstract class FileBrowser {
 						successListener.onSuccess(currentFile);
 				} else {
 					if (errorListener != null)
-						errorListener.onError("Unknown error.");
+						errorListener.onError(getError());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -2,6 +2,7 @@ package com.cbapps.kempengemeenten;
 
 import android.util.Log;
 
+import com.cb.kempengemeenten.R;
 import com.cbapps.kempengemeenten.callback.OnErrorListener;
 import com.cbapps.kempengemeenten.callback.OnProgressUpdateListener;
 import com.cbapps.kempengemeenten.callback.OnSuccessListener;
@@ -45,12 +46,12 @@ public class FTPFileTransferer {
 		return service.submit(() -> {
 			if (remoteFileInfo == null || localFileInfo == null) {
 				if (errorListener != null)
-					errorListener.onError("Input and/or output file not specified.");
+					errorListener.onError(R.string.error_file_not_found);
 				return null;
 			}
 			if (remoteFileInfo.isDirectory()) {
 				if (errorListener != null)
-					errorListener.onError("Remote 'file' is a directory. Did you mean to call downloadFiles() instead?");
+					errorListener.onError(R.string.error_file_is_directory);
 				return null;
 			}
 
@@ -85,24 +86,24 @@ public class FTPFileTransferer {
 					return remoteFileInfo;
 				} else {
 					if (errorListener != null)
-						errorListener.onError("Bad reply: " + connection.getClient().getReplyString());
+						errorListener.onError(R.string.error_ftp_bad_reply);
 					return null;
 				}
 			} catch (FTPConnectionClosedException e) {
 				if (errorListener != null)
-					errorListener.onError("Could not connect to FTP server.");
+					errorListener.onError(R.string.error_ftp_connection_closed);
 				return null;
 			} catch (FileNotFoundException e) {
 				if (errorListener != null)
-					errorListener.onError("Output-file not found");
+					errorListener.onError(R.string.error_file_not_found);
 				return null;
 			} catch (IOException e) {
 				if (errorListener != null)
-					errorListener.onError("IOException");
+					errorListener.onError(R.string.error_unknown_exception);
 				return null;
 			} catch (Exception e) {
 				if (errorListener != null)
-					errorListener.onError("Uncaught exception: " + e.getMessage());
+					errorListener.onError(R.string.error_unknown_exception);
 				return null;
 			}
 		});
@@ -117,11 +118,11 @@ public class FTPFileTransferer {
 			try {
 				if (remoteFileInfos == null || localDirectoryInfo == null) {
 					if (errorListener != null)
-						errorListener.onError("Input and/or output file(s) not specified.");
+						errorListener.onError(R.string.location_not_set_title);
 					return;
 				}
 				if (!localDirectoryInfo.isDirectory()) {
-					errorListener.onError("Local 'directory' is a file. Did you mean to call downloadFile() instead?");
+					errorListener.onError(R.string.error_file_is_directory);
 					return;
 				}
 
@@ -144,12 +145,12 @@ public class FTPFileTransferer {
 		return service.submit(() -> {
 			if (remoteDirectoryInfo == null || localFileInfo == null) {
 				if (errorListener != null)
-					errorListener.onError("Input and/or output file not specified.");
+					errorListener.onError(R.string.location_not_set_title);
 				return null;
 			}
 			if (localFileInfo.isDirectory()) {
 				if (errorListener != null)
-					errorListener.onError("The 'file' to upload is a directory. Did you mean to call uploadFiles() instead?");
+					errorListener.onError(R.string.error_file_is_directory);
 				return null;
 			}
 
@@ -185,24 +186,24 @@ public class FTPFileTransferer {
 					return remoteDirectoryInfo;
 				} else {
 					if (errorListener != null)
-						errorListener.onError("Bad reply: " + connection.getClient().getReplyString());
+						errorListener.onError(R.string.error_ftp_bad_reply);
 					return null;
 				}
 			} catch (FTPConnectionClosedException e) {
 				if (errorListener != null)
-					errorListener.onError("Could not connect to FTP server.");
+					errorListener.onError(R.string.error_ftp_connection_closed);
 				return null;
 			} catch (FileNotFoundException e) {
 				if (errorListener != null)
-					errorListener.onError("File to upload not found");
+					errorListener.onError(R.string.error_file_not_found);
 				return null;
 			} catch (IOException e) {
 				if (errorListener != null)
-					errorListener.onError("IOException");
+					errorListener.onError(R.string.error_unknown_exception);
 				return null;
 			} catch (Exception e) {
 				if (errorListener != null)
-					errorListener.onError("Uncaught exception: " + e.getMessage());
+					errorListener.onError(R.string.error_unknown_exception);
 				return null;
 			}
 		});
@@ -226,11 +227,11 @@ public class FTPFileTransferer {
 			try {
 				if (localFileInfos == null || remoteDirectoryInfo == null) {
 					if (errorListener != null)
-						errorListener.onError("Input and/or output file(s) not specified.");
+						errorListener.onError(R.string.location_not_set_title);
 					return;
 				}
 				if (!remoteDirectoryInfo.isDirectory()) {
-					errorListener.onError("The 'directory' to upload to is a file. Did you mean to call uploadFile() instead?");
+					errorListener.onError(R.string.error_directory_is_file);
 					return;
 				}
 

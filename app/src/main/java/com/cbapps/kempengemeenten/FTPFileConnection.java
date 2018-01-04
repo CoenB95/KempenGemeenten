@@ -1,6 +1,9 @@
 package com.cbapps.kempengemeenten;
 
+import android.support.annotation.StringRes;
 import android.util.Log;
+
+import com.cb.kempengemeenten.R;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
@@ -19,7 +22,7 @@ public class FTPFileConnection {
 	private String hostName;
 	private String username;
 	private String password;
-	private String error;
+	private @StringRes int error;
 
 	private FTPFileConnection() {
 		client = new FTPClient();
@@ -34,15 +37,19 @@ public class FTPFileConnection {
 			client.connect(hostName);
 			client.enterLocalPassiveMode();
 			try {
-				if (!client.login(username, password))
+				if (!client.login(username, password)) {
+					error = R.string.error_ftp_credentials_wrong;
 					return false;
+				}
 				client.setBufferSize(1024 * 1024);
 			} catch (FTPConnectionClosedException e) {
 				Log.e(TAG, "Connection closed while logging in.");
+				error = R.string.error_ftp_connection_closed;
 			}
 			return true;
 		} catch (Exception e) {
 			Log.e(TAG, "Could not open connection: " + e.getMessage());
+			error = R.string.error_unknown_exception;
 			return false;
 		}
 	}
@@ -55,5 +62,9 @@ public class FTPFileConnection {
 
 	public FTPClient getClient() {
 		return client;
+	}
+
+	public @StringRes int getError() {
+		return error;
 	}
 }
