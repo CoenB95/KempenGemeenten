@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 		MapFragment.OnLmsPointSelectedListener {
 
 	private static final String TAG = "MainActivity";
+	private static final String KEY_ACTIVE_FRAGMENT = "active_fragment";
 
 	private LmsDetailFragment detailFragment;
 	private UploadCentreFragment uploadCentreFragment;
@@ -80,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		PermissionManager.setup();
+
+		if (savedInstanceState != null)
+			shownMainFragmentTag = savedInstanceState.getString(KEY_ACTIVE_FRAGMENT);
 
 		detailFragment = (LmsDetailFragment) getSupportFragmentManager().findFragmentByTag("Detail");
 		MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentByTag("Map");
@@ -235,6 +239,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL, shownLmsPoint);
+		outState.putString(KEY_ACTIVE_FRAGMENT, shownMainFragmentTag);
 	}
 
 	@Override
