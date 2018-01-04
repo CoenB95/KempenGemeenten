@@ -35,12 +35,10 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 	private static final String TAG = "MainActivity";
 
-	private LmsDetailFragment detailFragment;
 	private UploadCentreFragment uploadCentreFragment;
-	private LmsPoint shownLmsPoint;
 
 	private SharedPreferences preferences;
-	private BottomSheetBehavior bottomSheetBehavior;
+
 	private DrawerLayout drawerLayout;
 	private NavigationView navigationView;
 	private ActionBarDrawerToggle drawerToggle;
@@ -58,11 +56,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
-		bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
-		bottomSheetBehavior.setHideable(true);
-		bottomSheetBehavior.setPeekHeight(300);
-		bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-
 		drawerLayout = findViewById(R.id.drawer);
 		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
 				R.string.drawer_open, R.string.drawer_close);
@@ -78,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 					setMainFragment(mapFragment, "Map", false);
 					return true;
 				case R.id.home:
-					bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 					setMainFragment(uploadCentreFragment, "UploadCentre", true);
 					return true;
 			}
@@ -91,12 +83,8 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 		PermissionManager.setup();
 
-		detailFragment = (LmsDetailFragment) getSupportFragmentManager().findFragmentByTag("Detail");
 		MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentByTag("Map");
 		uploadCentreFragment = (UploadCentreFragment) getSupportFragmentManager().findFragmentByTag("UploadCentre");
-
-		if (detailFragment == null)
-			detailFragment = new LmsDetailFragment();
 
 		if (mapFragment == null) {
 			mapFragment = new MapFragment();
@@ -110,24 +98,16 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 		if (uploadCentreFragment == null) {
 			uploadCentreFragment = new UploadCentreFragment();
-			setDetailFragment(detailFragment);
 		}
 
-		shownLmsPoint = (LmsPoint) getIntent().getSerializableExtra(MapFragment.EXTRA_SHOW_LMS_DETAIL);
-		if (shownLmsPoint != null)
-			mapFragment.showLmsDetail(shownLmsPoint);
-		else if (savedInstanceState != null) {
-			shownLmsPoint = (LmsPoint) savedInstanceState.getSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL);
-			if (shownLmsPoint != null)
-				mapFragment.showLmsDetail(shownLmsPoint);
-		}
-	}
-
-	private void setDetailFragment(Fragment fragment) {
-		getSupportFragmentManager()
-				.beginTransaction()
-				.replace(R.id.bottom_sheet_frame, fragment, "Detail")
-				.commit();
+//		shownLmsPoint = (LmsPoint) getIntent().getSerializableExtra(MapFragment.EXTRA_SHOW_LMS_DETAIL);
+//		if (shownLmsPoint != null)
+//			mapFragment.showLmsDetail(shownLmsPoint);
+//		else if (savedInstanceState != null) {
+//			shownLmsPoint = (LmsPoint) savedInstanceState.getSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL);
+//			if (shownLmsPoint != null)
+//				mapFragment.showLmsDetail(shownLmsPoint);
+//		}
 	}
 
 	private void setMainFragment(Fragment fragment, String tag, boolean backStack) {
@@ -171,7 +151,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 		super.onDestroy();
 	}
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (drawerToggle.onOptionsItemSelected(item))
@@ -198,25 +177,13 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 	@Override
 	public void onBackPressed() {
-		switch (bottomSheetBehavior.getState()) {
-			case BottomSheetBehavior.STATE_DRAGGING:
-			case BottomSheetBehavior.STATE_SETTLING:
-				return;
-			case BottomSheetBehavior.STATE_EXPANDED:
-				bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-				return;
-			case BottomSheetBehavior.STATE_COLLAPSED:
-				bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-				return;
-			case BottomSheetBehavior.STATE_HIDDEN:
-			default:
-				//Fall through to super.
-				break;
-		}
-		if (drawerLayout.isDrawerVisible(GravityCompat.START)) {
-			drawerLayout.closeDrawer(GravityCompat.START);
-		} else {
-			super.onBackPressed();
+		MapFragment map = (MapFragment) getSupportFragmentManager().findFragmentByTag("Map");
+		if (map == null || !map.isVisible() || !map.onBackPressed()) {
+			if (drawerLayout.isDrawerVisible(GravityCompat.START)) {
+				drawerLayout.closeDrawer(GravityCompat.START);
+			} else {
+				super.onBackPressed();
+			}
 		}
 	}
 
@@ -250,17 +217,17 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL, shownLmsPoint);
+		//outState.putSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL, shownLmsPoint);
 	}
 
 	@Override
 	public void onLmsPointSelected(LmsPoint point) {
-		shownLmsPoint = point;
-		if (point == null) {
-			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-		} else {
-			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-			detailFragment.showDetail(point);
-		}
+//		shownLmsPoint = point;
+//		if (point == null) {
+//			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+//		} else {
+//			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+//			detailFragment.showDetail(point);
+//		}
 	}
 }

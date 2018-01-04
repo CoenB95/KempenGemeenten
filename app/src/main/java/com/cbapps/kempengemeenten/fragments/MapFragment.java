@@ -14,14 +14,21 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -43,6 +50,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -65,7 +73,7 @@ import java.util.concurrent.Executors;
  * @author CoenB95
  */
 
-public class MapFragment extends SupportMapFragment implements OnMapReadyCallback {
+public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 
 	public static final String TAG = "MapFragment";
 	public static final String EXTRA_SHOW_LMS_DETAIL = "show-lms-point-detail";
@@ -83,16 +91,18 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	private List<Marker> markers;
 	private LiveData<LmsPoint> observedPoint;
 	private Observer<LmsPoint> markerClickObserver;
+	private BottomSheetBehavior bottomSheetBehavior;
+	private LmsDetailFragment detailFragment;
 
 	private LmsPoint shownPoint;
-	private Polyline shownPolyLine;
+	private List<Polyline> shownPolyLine;
 
 	private OnLmsPointSelectedListener listener;
 
 	public MapFragment() {
 		service = Executors.newCachedThreadPool();
 		handler = new Handler();
-		getMapAsync(this);
+		shownPolyLine = new ArrayList<>();
 	}
 
 	private void createLmsMarkers(GoogleMap googleMap, List<LmsPoint> points) {
@@ -191,13 +201,61 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 						.getJSONObject("overview_polyline")
 						.getString("points");
 
-				shownPolyLine = googleMap.addPolyline(new PolylineOptions()
+				shownPolyLine.add(googleMap.addPolyline(new PolylineOptions()
 						.addAll(PolyUtil.decode(encodedPoly))
-						.color(ContextCompat.getColor(getContext(), R.color.colorAccent)));
+						.color(ContextCompat.getColor(getContext(), R.color.colorAccent))));
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
 		}, error -> Log.w(TAG, "Too bad!")));
+	}
+
+	public boolean onBackPressed() {
+		switch (bottomSheetBehavior.getState()) {
+			case BottomSheetBehavior.STATE_DRAGGING:
+			case BottomSheetBehavior.STATE_SETTLING:
+				return true;
+			case BottomSheetBehavior.STATE_EXPANDED:
+				bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+				return true;
+			case BottomSheetBehavior.STATE_COLLAPSED:
+				bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+				return true;
+			case BottomSheetBehavior.STATE_HIDDEN:
+			default:
+				return false;
+		}
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+		View view = layoutInflater.inflate(R.layout.map_layout, viewGroup, false);
+
+		SupportMapFragment map = new SupportMapFragment();
+
+		if (getActivity() == null)
+			throw new IllegalStateException("No activity?!");
+
+		getActivity().getSupportFragmentManager().beginTransaction()
+				.replace(R.id.mapFrame, map, "GoogleMap")
+				.commit();
+		map.getMapAsync(this);
+
+		detailFragment = new LmsDetailFragment();
+		getActivity().getSupportFragmentManager().beginTransaction()
+				.replace(R.id.bottom_sheet_frame, detailFragment, "Detail")
+				.commit();
+
+		bottomSheetBehavior = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet));
+		bottomSheetBehavior.setHideable(true);
+		bottomSheetBehavior.setPeekHeight(300);
+		bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+		if (bundle != null) {
+			shownPoint = (LmsPoint) bundle.getSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL);
+		}
+
+		return view;
 	}
 
 	//Permission is taken care of, but lint doesn't believe it.
@@ -205,7 +263,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
 		this.googleMap = googleMap;
-		markerClickObserver = this::showLmsDetail;
+		markerClickObserver = marker -> showLmsDetail(marker, true);
 
 		googleMap.setOnMarkerClickListener(marker -> {
 			if (observedPoint != null)
@@ -214,12 +272,13 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 			observedPoint.observe(this, markerClickObserver);
 			return false;
 		});
+
 		googleMap.setOnMapClickListener(latLng -> {
 			handler.post(() -> {
 				if (observedPoint != null)
 					observedPoint.removeObserver(markerClickObserver);
 				observedPoint = null;
-				showLmsDetail(null);
+				showLmsDetail(null, false);
 			});
 		});
 
@@ -228,7 +287,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 			handler.post(() -> {
 				createLmsMarkers(googleMap, lmsPoints);
 				if (shownPoint != null)
-					showLmsDetail(shownPoint);
+					showLmsDetail(shownPoint, false);
 				startGeofencing(getContext(), lmsPoints);
 			});
 		});
@@ -241,29 +300,47 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 					googleMap.setMyLocationEnabled(true);
 					LatLng pos = fetchLastLocation();
 					if (pos != null)
-						googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 10));
+						googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 10));
 				}
 			}
 		}, Manifest.permission.ACCESS_FINE_LOCATION);
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL, shownPoint);
 	}
 
 	public void setLmsPointSelectedListener(OnLmsPointSelectedListener listener) {
 		this.listener = listener;
 	}
 
-	public void showLmsDetail(LmsPoint point) {
-		if (shownPolyLine != null) {
-			shownPolyLine.remove();
-			shownPolyLine = null;
-		}
+	public void showLmsDetail(LmsPoint point, boolean animateCamera) {
+		for (Polyline polyline : shownPolyLine)
+			polyline.remove();
+
 		shownPoint = point;
 		if (listener != null)
 			listener.onLmsPointSelected(point);
+
+		if (point == null) {
+			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+		} else {
+			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+			detailFragment.showDetail(point);
+		}
+
 		if (point == null)
 			return;
 		if (googleMap == null)
 			return;
-		googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(CONVERTER.toLatLng(point.getRdX(), point.getRdY()), 14));
+
+		if (animateCamera)
+			googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(CONVERTER.toLatLng(point.getRdX(), point.getRdY()), 14));
+		else
+			googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CONVERTER.toLatLng(point.getRdX(), point.getRdY()), 14));
+
 		for (Marker marker : markers) {
 			if (marker.getTag() != null && ((int) marker.getTag()) == point.getLmsNumber()) {
 				marker.showInfoWindow();
