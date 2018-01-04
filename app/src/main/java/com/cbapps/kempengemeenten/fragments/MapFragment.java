@@ -215,14 +215,17 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 			return false;
 		});
 		googleMap.setOnMapClickListener(latLng -> {
-			if (observedPoint != null)
-				observedPoint.removeObserver(markerClickObserver);
-			observedPoint = null;
-			showLmsDetail(null);
+			handler.post(() -> {
+				if (observedPoint != null)
+					observedPoint.removeObserver(markerClickObserver);
+				observedPoint = null;
+				showLmsDetail(null);
+			});
 		});
 
 		service.submit(() -> {
-			LmsDatabase.newInstance(getContext()).lmsDao().getAll().observe(this, lmsPoints -> {
+			List<LmsPoint> lmsPoints = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
+			handler.post(() -> {
 				createLmsMarkers(googleMap, lmsPoints);
 				if (shownPoint != null)
 					showLmsDetail(shownPoint);
@@ -264,6 +267,8 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 		for (Marker marker : markers) {
 			if (marker.getTag() != null && ((int) marker.getTag()) == point.getLmsNumber()) {
 				marker.showInfoWindow();
+				marker.setIcon(BitmapDescriptorFactory.defaultMarker(point.isMeasured() ?
+						BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_RED));
 				break;
 			}
 		}

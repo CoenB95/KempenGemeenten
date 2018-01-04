@@ -18,7 +18,10 @@ import java.util.List;
 @Dao
 public interface LmsDao {
 	@Query("SELECT * FROM lmspoint")
-	LiveData<List<LmsPoint>> getAll();
+	LiveData<List<LmsPoint>> getAllLive();
+
+	@Query("SELECT * FROM lmspoint")
+	List<LmsPoint> getAll();
 
 	@Query("SELECT * FROM lmspoint WHERE lmsNumber LIKE :id LIMIT 1")
 	LiveData<LmsPoint> findByLmsNumber(int id);

@@ -73,7 +73,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			drawerLayout.closeDrawers();
 			switch (item.getItemId()) {
 				case R.id.map:
-					setMainFragment(new MapFragment(), "Map", false);
+					MapFragment mapFragment = new MapFragment();
+					mapFragment.setLmsPointSelectedListener(this);
+					setMainFragment(mapFragment, "Map", false);
 					return true;
 				case R.id.home:
 					bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 		if (mapFragment == null) {
 			mapFragment = new MapFragment();
+			mapFragment.setLmsPointSelectedListener(this);
 			navigationView.setCheckedItem(R.id.map);
 			getSupportFragmentManager()
 					.beginTransaction()
@@ -109,8 +112,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			uploadCentreFragment = new UploadCentreFragment();
 			setDetailFragment(detailFragment);
 		}
-
-		mapFragment.setLmsPointSelectedListener(this);
 
 		shownLmsPoint = (LmsPoint) getIntent().getSerializableExtra(MapFragment.EXTRA_SHOW_LMS_DETAIL);
 		if (shownLmsPoint != null)

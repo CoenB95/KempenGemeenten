@@ -48,7 +48,7 @@ public class LmsDetailFragment extends DialogFragment {
 		pointMeasuredSwitch = view.findViewById(R.id.pointMeasuredSwitch);
 
 		pointMeasuredSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
-			if (shownPoint == null)
+			if (!b || shownPoint == null)
 				return;
 			service.submit(() ->
 				LmsDatabase.newInstance(getContext()).lmsDao().update(shownPoint.measured()));
@@ -83,12 +83,13 @@ public class LmsDetailFragment extends DialogFragment {
 	}
 
 	public void showDetail(LmsPoint point) {
-		shownPoint = point;
+		shownPoint = null;
 		if (pointTownView == null || pointStreetView == null)
 			return;
 		pointStreetView.setText(point.getAddress());
 		pointTownView.setText(point.getTown());
 		pointMeasuredSwitch.setChecked(point.isMeasured());
 		pointMeasuredSwitch.setEnabled(!point.isMeasured());
+		shownPoint = point;
 	}
 }
