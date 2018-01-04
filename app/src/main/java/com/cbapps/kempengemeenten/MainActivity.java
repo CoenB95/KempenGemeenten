@@ -2,9 +2,11 @@ package com.cbapps.kempengemeenten;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	private String shownMainFragmentTag;
 	private LmsPoint shownLmsPoint;
 
+	private SharedPreferences preferences;
 	private BottomSheetBehavior bottomSheetBehavior;
 	private DrawerLayout drawerLayout;
 	private ActionBarDrawerToggle drawerToggle;
@@ -46,7 +49,11 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_layout);
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		AndroidThreeTen.init(getBaseContext());
+		FTPFileConnection.setDefaultConnection("ftp.kempengemeenten.nl",
+				preferences.getString("ftpUsername", ""),
+				preferences.getString("ftpPassword", ""));
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);

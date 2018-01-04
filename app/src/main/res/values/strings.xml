@@ -50,5 +50,6 @@
 	<string name="error_file_not_found">File not found</string>
     <string name="error_ftp_bad_reply">The server responded with a negative code</string>
     <string name="error_file_is_directory">One of the location is set as a directory instead of a file</string>
+    <string name="ftp_connected">Connected to FTP server</string>
 
 </resources>

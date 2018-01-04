@@ -45,13 +45,15 @@
 		    android:negativeButtonText="@string/cancel"
 		    android:title="@string/username" />
 
-	    <EditTextPreference
-		    android:dialogTitle="@string/password"
-		    android:key="ftpPassword"
-		    android:positiveButtonText="@string/save"
-		    android:negativeButtonText="@string/cancel"
-		    android:title="@string/password"
-		    android:inputType="textPassword" />
+		<EditTextPreference
+			android:dialogTitle="@string/password"
+			android:hint="@string/password"
+			android:inputType="textPassword"
+			android:key="ftpPassword"
+			android:negativeButtonText="@string/cancel"
+			android:password="true"
+			android:positiveButtonText="@string/save"
+			android:title="@string/password" />
     </PreferenceCategory>
 
 	<PreferenceCategory

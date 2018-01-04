@@ -149,16 +149,19 @@ public class UploadCentreFragment extends DialogFragment {
 	}
 
 	private void startFTP() {
-		connection = FTPFileConnection.getConnection();
+		connection = FTPFileConnection.getDefaultConnection();
 		ftpFileBrowser = new FTPFileBrowser(connection);
 		transferer = new FTPFileTransferer(connection);
 		ExecutorService service = Executors.newCachedThreadPool();
 		service.submit(() -> {
 			if (connection.connect()) {
+				setStatus(R.string.ftp_connected);
 				handler.post(() -> {
 					downloadButton.setEnabled(true);
 					uploadButton.setEnabled(true);
 				});
+			} else {
+				setStatus(connection.getError());
 			}
 		});
 		service.shutdown();

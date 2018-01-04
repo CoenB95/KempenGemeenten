@@ -24,11 +24,11 @@ public class FTPFileConnection {
 	private String password;
 	private @StringRes int error;
 
-	private FTPFileConnection() {
+	private FTPFileConnection(String hostName, String username, String password) {
 		client = new FTPClient();
-		hostName = "ftp.kempengemeenten.nl";
-		username = "Geo1";
-		password = "Ftpgeo1";
+		this.hostName = hostName;
+		this.username = username;
+		this.password = password;
 	}
 
 	public boolean connect() {
@@ -54,10 +54,12 @@ public class FTPFileConnection {
 		}
 	}
 
-	public static FTPFileConnection getConnection() {
-		if (connection == null)
-			connection = new FTPFileConnection();
+	public static FTPFileConnection getDefaultConnection() {
 		return connection;
+	}
+
+	public static void setDefaultConnection(String hostName, String username, String password) {
+		connection = new FTPFileConnection(hostName, username, password);
 	}
 
 	public FTPClient getClient() {

@@ -47,4 +47,5 @@
 	<string name="error_file_not_found">Bestand niet gevonden</string>
     <string name="error_ftp_bad_reply">De server gaf een negatief antwoord</string>
     <string name="error_file_is_directory">Een der locaties is ingesteld als een map in plaats van een bestand</string>
+    <string name="ftp_connected">Verbonden met FTP server</string>
 </resources>
