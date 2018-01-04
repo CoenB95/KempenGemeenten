@@ -15,7 +15,7 @@
     <string name="upload">Upload photo\'s</string>
     <string name="download">Download updatefile</string>
     <string name="choose_directory">Choose a directory</string>
-    <string name="home">Home</string>
+    <string name="upload_centre">Synchronize</string>
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">Close drawer</string>
     <string name="map">Map</string>

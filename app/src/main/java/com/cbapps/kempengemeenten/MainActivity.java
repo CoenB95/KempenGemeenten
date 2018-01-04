@@ -14,6 +14,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -33,16 +34,15 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 		MapFragment.OnLmsPointSelectedListener {
 
 	private static final String TAG = "MainActivity";
-	private static final String KEY_ACTIVE_FRAGMENT = "active_fragment";
 
 	private LmsDetailFragment detailFragment;
 	private UploadCentreFragment uploadCentreFragment;
-	private String shownMainFragmentTag;
 	private LmsPoint shownLmsPoint;
 
 	private SharedPreferences preferences;
 	private BottomSheetBehavior bottomSheetBehavior;
 	private DrawerLayout drawerLayout;
+	private NavigationView navigationView;
 	private ActionBarDrawerToggle drawerToggle;
 
 	@Override
@@ -68,16 +68,16 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 				R.string.drawer_open, R.string.drawer_close);
 		drawerLayout.addDrawerListener(drawerToggle);
 
-		NavigationView navigationView = findViewById(R.id.navigationView);
+		navigationView = findViewById(R.id.navigationView);
 		navigationView.setNavigationItemSelectedListener(item -> {
 			drawerLayout.closeDrawers();
 			switch (item.getItemId()) {
 				case R.id.map:
-					setMainFragment(new MapFragment(), "Map");
+					setMainFragment(new MapFragment(), "Map", false);
 					return true;
 				case R.id.home:
 					bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-					setMainFragment(uploadCentreFragment, "UploadCentre");
+					setMainFragment(uploadCentreFragment, "UploadCentre", true);
 					return true;
 			}
 			return false;
@@ -89,9 +89,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 		PermissionManager.setup();
 
-		if (savedInstanceState != null)
-			shownMainFragmentTag = savedInstanceState.getString(KEY_ACTIVE_FRAGMENT);
-
 		detailFragment = (LmsDetailFragment) getSupportFragmentManager().findFragmentByTag("Detail");
 		MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentByTag("Map");
 		uploadCentreFragment = (UploadCentreFragment) getSupportFragmentManager().findFragmentByTag("UploadCentre");
@@ -101,7 +98,11 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 		if (mapFragment == null) {
 			mapFragment = new MapFragment();
-			setMainFragment(mapFragment, "Map");
+			navigationView.setCheckedItem(R.id.map);
+			getSupportFragmentManager()
+					.beginTransaction()
+					.replace(R.id.content, mapFragment, "Map")
+					.commit();
 		}
 
 		if (uploadCentreFragment == null) {
@@ -128,14 +129,14 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 				.commit();
 	}
 
-	private void setMainFragment(Fragment fragment, String tag) {
-		if (shownMainFragmentTag != null && shownMainFragmentTag.equals(tag))
-			return;
-		shownMainFragmentTag = tag;
-		getSupportFragmentManager()
-				.beginTransaction()
-				.replace(R.id.content, fragment, tag)
-				.commit();
+	private void setMainFragment(Fragment fragment, String tag, boolean backStack) {
+		getSupportFragmentManager().popBackStack("main-backstack", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+		FragmentTransaction ft = getSupportFragmentManager()
+				.beginTransaction();
+		ft.replace(R.id.content, fragment, tag);
+		if (backStack)
+			ft.addToBackStack("main-backstack");
+		ft.commit();
 	}
 
 	@Override
@@ -211,8 +212,8 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 				//Fall through to super.
 				break;
 		}
-		if (!shownMainFragmentTag.equals("Map")) {
-			setMainFragment(new MapFragment(), "Map");
+		if (drawerLayout.isDrawerVisible(GravityCompat.START)) {
+			drawerLayout.closeDrawer(GravityCompat.START);
 		} else {
 			super.onBackPressed();
 		}
@@ -232,6 +233,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 	@Override
 	public void onBackStackChanged() {
+		Fragment home = getSupportFragmentManager().findFragmentByTag("Map");
+		if (home != null && home.isVisible())
+			navigationView.setCheckedItem(R.id.map);
 		Fragment fragment = getSupportFragmentManager().findFragmentByTag("Settings");
 		if (fragment == null || !fragment.isVisible()) {
 			drawerToggle.setDrawerIndicatorEnabled(true);
@@ -246,7 +250,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL, shownLmsPoint);
-		outState.putString(KEY_ACTIVE_FRAGMENT, shownMainFragmentTag);
 	}
 
 	@Override
