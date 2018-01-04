@@ -19,12 +19,15 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.database.LmsDatabase;
 import com.cbapps.kempengemeenten.database.LmsPoint;
 
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author CoenB95
@@ -40,6 +43,7 @@ public class LmsDetailFragment extends DialogFragment {
 
 	private LmsPoint shownPoint;
 	private SharedPreferences preferences;
+	private ExecutorService service;
 
 	@Nullable
 	@Override
@@ -47,10 +51,18 @@ public class LmsDetailFragment extends DialogFragment {
 		View view = inflater.inflate(R.layout.point_detail_layout, container, false);
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		service = Executors.newCachedThreadPool();
 
 		pointTownView = view.findViewById(R.id.pointTown);
 		pointStreetView = view.findViewById(R.id.pointStreet);
 		pointMeasuredSwitch = view.findViewById(R.id.pointMeasuredSwitch);
+
+		pointMeasuredSwitch.setOnClickListener(v -> {
+			if (shownPoint == null)
+				return;
+			service.submit(() ->
+				LmsDatabase.newInstance(getContext()).lmsDao().update(shownPoint.measured()));
+		});
 
 		if (shownPoint != null)
 			showDetail(shownPoint);
@@ -87,5 +99,6 @@ public class LmsDetailFragment extends DialogFragment {
 		pointStreetView.setText(point.getAddress());
 		pointTownView.setText(point.getTown());
 		pointMeasuredSwitch.setChecked(point.isMeasured());
+		pointMeasuredSwitch.setEnabled(!point.isMeasured());
 	}
 }

@@ -114,4 +114,9 @@ public class LmsPoint implements Serializable {
 	public boolean isMeasured() {
 		return !(measured == null || measured.isEmpty()) && getDateMeasured() != null;
 	}
+
+	public LmsPoint measured() {
+		return new LmsPoint(lmsNumber, rdX, rdY, town, street, houseNumber, appendix,
+				LocalDateTime.now().toString(), measuringMinutes, photos);
+	}
 }

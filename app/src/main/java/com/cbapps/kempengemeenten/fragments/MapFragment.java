@@ -6,6 +6,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -78,8 +80,9 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	private static ExecutorService service;
 	private Handler handler;
 	private GoogleMap googleMap;
-	private List<LmsPoint> points;
 	private List<Marker> markers;
+	private LiveData<LmsPoint> observedPoint;
+	private Observer<LmsPoint> markerClickObserver;
 
 	private LmsPoint shownPoint;
 	private Polyline shownPolyLine;
@@ -92,7 +95,11 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 		getMapAsync(this);
 	}
 
-	private void createLmsMarkers(GoogleMap googleMap) {
+	private void createLmsMarkers(GoogleMap googleMap, List<LmsPoint> points) {
+		if (markers != null) {
+			for (Marker marker : markers)
+				marker.remove();
+		}
 		markers = new ArrayList<>();
 		for (LmsPoint point : points) {
 			LatLng test = CONVERTER.toLatLng(point.getRdX(), point.getRdY());
@@ -198,6 +205,9 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	public void onMapReady(GoogleMap googleMap) {
 		this.googleMap = googleMap;
 		Toast.makeText(getContext(), "Map initialized", Toast.LENGTH_SHORT).show();
+
+		markerClickObserver = this::showLmsDetail;
+
 		PermissionManager.requestPermission(getActivity(), PermissionManager.READ_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
 			for (PermissionManager.PermissionResult result : results) {
 				if (result.getPermission().equals(Manifest.permission.ACCESS_FINE_LOCATION) &&
@@ -209,27 +219,27 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 					if (pos != null)
 						googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 10));
 					googleMap.setOnMarkerClickListener(marker -> {
-						for (LmsPoint p : points) {
-							if (p.getLmsNumber() == (int) marker.getTag()) {
-								showLmsDetail(p);
-								break;
-							}
-						}
+						if (observedPoint != null)
+							observedPoint.removeObserver(markerClickObserver);
+						observedPoint = LmsDatabase.newInstance(getContext()).lmsDao().findByLmsNumber((int) marker.getTag());
+						observedPoint.observe(this, markerClickObserver);
 						return false;
 					});
 					googleMap.setOnMapClickListener(latLng -> {
+						if (observedPoint != null)
+							observedPoint.removeObserver(markerClickObserver);
+						observedPoint = null;
 						showLmsDetail(null);
 					});
 
 					service.submit(() -> {
-						points = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
-						handler.post(() -> {
-							createLmsMarkers(googleMap);
-							if (shownPoint != null)
-								showLmsDetail(shownPoint);
-							startGeofencing(getContext(), points);
+						LmsDatabase.newInstance(getContext()).lmsDao().getAll().observe(this, lmsPoints -> {
+							createLmsMarkers(googleMap, lmsPoints);
+							startGeofencing(getContext(), lmsPoints);
 						});
 					});
+					if (shownPoint != null)
+						showLmsDetail(shownPoint);
 				}
 			}
 		}, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -330,7 +340,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 				service.submit(() -> {
 					for (Geofence fence : triggeringGeofences) {
 						LmsPoint p = LmsDatabase.newInstance(context).lmsDao()
-								.findByLmsNumber(Integer.parseInt(fence.getRequestId()));
+								.findByLmsNumber(Integer.parseInt(fence.getRequestId())).getValue();
 
 						createNotification(context, p);
 					}
