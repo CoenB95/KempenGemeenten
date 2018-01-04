@@ -37,4 +37,6 @@
 	<string name="location_not_set_title">Locatie niet bekend</string>
     <string name="location_not_set_description">Eén of meer locatie voorkeuren zijn nog niet ingevuld. Ga a.u.b. naar instellingen en pas de benodigde voorkeuren aan.</string>
 	<string name="local_locations">Lokale opslaglocaties</string>
+	<string name="status_updates_download_succeeded">Meetpunten succesvol geüpdated</string>
+    <string name="status_updates_download_csv_wrong">Fout: het updatebestand bevatte onvoorziene data</string>
 </resources>

@@ -40,5 +40,7 @@
 	<string name="location_not_set_title">Location not set</string>
     <string name="location_not_set_description">One or more location preferences are not yet set. Please set them using the Settings menu item.</string>
 	<string name="local_locations">Local locations</string>
+	<string name="status_updates_download_succeeded">Successfully updated measuring points</string>
+    <string name="status_updates_download_csv_wrong">Error: the updatefile contained unexpected data</string>
 
 </resources>

@@ -174,7 +174,8 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	}
 
 	private void fetchAndDisplayDirections(LatLng from, LatLng to) {
-
+		if (from == null || to == null)
+			return;
 		String apiKey = getString(R.string.google_maps_key);
 		RequestQueue queue = Volley.newRequestQueue(getContext());
 		queue.add(new JsonObjectRequest(Request.Method.GET,
@@ -204,42 +205,40 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
 		this.googleMap = googleMap;
-		Toast.makeText(getContext(), "Map initialized", Toast.LENGTH_SHORT).show();
-
 		markerClickObserver = this::showLmsDetail;
+
+		googleMap.setOnMarkerClickListener(marker -> {
+			if (observedPoint != null)
+				observedPoint.removeObserver(markerClickObserver);
+			observedPoint = LmsDatabase.newInstance(getContext()).lmsDao().findByLmsNumber((int) marker.getTag());
+			observedPoint.observe(this, markerClickObserver);
+			return false;
+		});
+		googleMap.setOnMapClickListener(latLng -> {
+			if (observedPoint != null)
+				observedPoint.removeObserver(markerClickObserver);
+			observedPoint = null;
+			showLmsDetail(null);
+		});
+
+		service.submit(() -> {
+			LmsDatabase.newInstance(getContext()).lmsDao().getAll().observe(this, lmsPoints -> {
+				createLmsMarkers(googleMap, lmsPoints);
+				if (shownPoint != null)
+					showLmsDetail(shownPoint);
+				startGeofencing(getContext(), lmsPoints);
+			});
+		});
 
 		PermissionManager.requestPermission(getActivity(), PermissionManager.READ_PERMISSION_REQUEST_CODE, (requestCode, results) -> {
 			for (PermissionManager.PermissionResult result : results) {
 				if (result.getPermission().equals(Manifest.permission.ACCESS_FINE_LOCATION) &&
 						result.isGranted()) {
-					Toast.makeText(getContext(), "Location granted!", Toast.LENGTH_SHORT).show();
 
 					googleMap.setMyLocationEnabled(true);
 					LatLng pos = fetchLastLocation();
 					if (pos != null)
 						googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 10));
-					googleMap.setOnMarkerClickListener(marker -> {
-						if (observedPoint != null)
-							observedPoint.removeObserver(markerClickObserver);
-						observedPoint = LmsDatabase.newInstance(getContext()).lmsDao().findByLmsNumber((int) marker.getTag());
-						observedPoint.observe(this, markerClickObserver);
-						return false;
-					});
-					googleMap.setOnMapClickListener(latLng -> {
-						if (observedPoint != null)
-							observedPoint.removeObserver(markerClickObserver);
-						observedPoint = null;
-						showLmsDetail(null);
-					});
-
-					service.submit(() -> {
-						LmsDatabase.newInstance(getContext()).lmsDao().getAll().observe(this, lmsPoints -> {
-							createLmsMarkers(googleMap, lmsPoints);
-							startGeofencing(getContext(), lmsPoints);
-						});
-					});
-					if (shownPoint != null)
-						showLmsDetail(shownPoint);
 				}
 			}
 		}, Manifest.permission.ACCESS_FINE_LOCATION);

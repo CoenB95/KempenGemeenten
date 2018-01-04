@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
@@ -17,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.cb.kempengemeenten.R;
 import com.cbapps.kempengemeenten.DefaultFileInfo;
@@ -59,6 +61,7 @@ public class UploadCentreFragment extends DialogFragment {
 	private Handler handler;
 	private Button downloadButton;
 	private Button uploadButton;
+	private TextView statusTextView;
 	private FileBrowserAdapter adapter;
 	private SharedPreferences preferences;
 
@@ -78,6 +81,7 @@ public class UploadCentreFragment extends DialogFragment {
 
 		downloadButton = view.findViewById(R.id.downloadButton);
 		uploadButton = view.findViewById(R.id.uploadButton);
+		statusTextView = view.findViewById(R.id.statusTextView);
 		downloadButton.setEnabled(false);
 		uploadButton.setEnabled(false);
 
@@ -134,9 +138,10 @@ public class UploadCentreFragment extends DialogFragment {
 		}, Manifest.permission.READ_EXTERNAL_STORAGE);
 	}
 
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
+	private void setStatus(@StringRes int text) {
+		handler.post(() -> {
+			statusTextView.setText(text);
+		});
 	}
 
 	private void startFTP() {
@@ -190,19 +195,17 @@ public class UploadCentreFragment extends DialogFragment {
 													split[9]); //photos json-array
 											points.add(point);
 										}
+
+										LmsDatabase.newInstance(getContext()).lmsDao().insertOrReplaceAll(points);
+										setStatus(R.string.status_updates_download_succeeded);
 									} catch (NumberFormatException e) {
 										Log.e(TAG, "Could not parse csv.");
+										setStatus(R.string.status_updates_download_csv_wrong);
 									} catch (FileNotFoundException e) {
 										e.printStackTrace();
 									} catch (IOException e) {
 										e.printStackTrace();
 									}
-
-									LmsDatabase.newInstance(getContext()).lmsDao().insertOrReplaceAll(points);
-
-									Log.i(TAG, String.format("Inserted %d points into database." +
-													" Temp-file deleted=%b",
-											points.size(), tempFile.delete()));
 								},
 								(info, progress) ->
 										Log.d(TAG, String.format("Downloading '%s': %.1f%%",
