@@ -33,6 +33,13 @@
 			android:title="@string/location_upload_photos_ftp"
 			browseMode="localDirectories"/>
 
+		<CheckBoxPreference
+			android:key="deleteAfterUpload"
+			android:title="@string/delete_after_upload_title"
+			android:summaryOn="@string/delete_after_upload_description_on"
+			android:summaryOff="@string/delete_after_upload_description_off"
+			android:defaultValue="false"/>
+
 	</PreferenceCategory>
 
     <PreferenceCategory

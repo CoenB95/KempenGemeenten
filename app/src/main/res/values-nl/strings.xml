@@ -48,4 +48,7 @@
     <string name="error_ftp_bad_reply">De server gaf een negatief antwoord</string>
     <string name="error_file_is_directory">Een der locaties is ingesteld als een map in plaats van een bestand</string>
     <string name="ftp_connected">Verbonden met FTP server</string>
+	<string name="delete_after_upload_description_on">Verwijder foto\'s na succesvol geüpload te zijn</string>
+    <string name="delete_after_upload_title">Verwijder foto\'s bij succes</string>
+    <string name="delete_after_upload_description_off">Behoud de orginele foto\'s veilig op het apparaat</string>
 </resources>

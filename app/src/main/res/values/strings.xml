@@ -51,5 +51,8 @@
     <string name="error_ftp_bad_reply">The server responded with a negative code</string>
     <string name="error_file_is_directory">One of the location is set as a directory instead of a file</string>
     <string name="ftp_connected">Connected to FTP server</string>
+	<string name="delete_after_upload_description_on">Delete photo\'s after uploading successfully</string>
+    <string name="delete_after_upload_title">Delete photo\'s on success</string>
+    <string name="delete_after_upload_description_off">Keep the original photo\'s safe on the device</string>
 
 </resources>

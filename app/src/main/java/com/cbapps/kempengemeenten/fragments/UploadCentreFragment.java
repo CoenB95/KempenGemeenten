@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -248,6 +249,11 @@ public class UploadCentreFragment extends DialogFragment {
 					transferer.uploadFiles(result1, remoteDirectory, filter, info -> {
 						Log.i(TAG, String.format("Successfully uploaded '%s'", info.getName()));
 						adapter.showProgress(info, false);
+						if (preferences.getBoolean("deleteAfterUpload", false)) {
+							if (!new File(info.getPath()).delete())
+								Log.e(TAG, "Could not delete file!");
+							else Log.i(TAG, "File deleted!");
+						}
 					}, (info, progress) -> {
 						Log.d(TAG, String.format("Downloading '%s': %.1f%%",
 								info.getName(), progress * 100));
