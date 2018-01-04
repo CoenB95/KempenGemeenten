@@ -169,6 +169,21 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 	@Override
 	public void onBackPressed() {
+		switch (bottomSheetBehavior.getState()) {
+			case BottomSheetBehavior.STATE_DRAGGING:
+			case BottomSheetBehavior.STATE_SETTLING:
+				return;
+			case BottomSheetBehavior.STATE_EXPANDED:
+				bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+				return;
+			case BottomSheetBehavior.STATE_COLLAPSED:
+				bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+				return;
+			case BottomSheetBehavior.STATE_HIDDEN:
+			default:
+				//Fall through to super.
+				break;
+		}
 		super.onBackPressed();
 	}
 
