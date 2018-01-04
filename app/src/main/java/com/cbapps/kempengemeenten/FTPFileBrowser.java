@@ -28,6 +28,8 @@ public class FTPFileBrowser extends FileBrowser {
 	protected boolean changeDirectory(String subDirName) {
 		error = null;
 		try {
+			if (!connection.getClient().isConnected())
+				connection.connect();
 			FTPFile f = connection.getClient().mlistFile(subDirName);
 			setCurrentFile(new FTPFileInfo(f).withPathAndName(subDirName));
 			return true;
@@ -53,6 +55,8 @@ public class FTPFileBrowser extends FileBrowser {
 	@Override
 	protected List<FileInfo> listFiles(String remoteDirectoryName) {
 		try {
+			if (!connection.getClient().isConnected())
+				connection.connect();
 			FTPFile[] files = connection.getClient().listFiles(remoteDirectoryName);
 			List<FileInfo> fileInfos = new ArrayList<>();
 			for (FTPFile file : files) {
