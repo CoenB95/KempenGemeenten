@@ -140,37 +140,40 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 		}
 	}
 
-	public void fetchAndDisplayDirectionsTo(LmsPoint point) {
+	public LatLng fetchLastLocation() {
 		if (getContext() == null) {
-			Log.d(TAG, "fetchAndDisplayDirectionsTo: no context");
-			return;
+			Log.d(TAG, "fetchLastLocation: no context");
+			return null;
 		}
 
 		if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
 				!= PackageManager.PERMISSION_GRANTED) {
-			Log.d(TAG, "fetchAndDisplayDirectionsTo: no permission");
-			return;
+			Log.d(TAG, "fetchLastLocation: no permission");
+			return null;
 		}
 
 		LocationManager manager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
 		if (manager == null) {
-			Log.d(TAG, "fetchAndDisplayDirectionsTo: no manager");
-			return;
+			Log.d(TAG, "fetchLastLocation: no manager");
+			return null;
 		}
 
 		Location location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 		if (location == null) {
-			Log.d(TAG, "fetchAndDisplayDirectionsTo: no known location");
-			return;
+			Log.d(TAG, "fetchLastLocation: no known location");
+			return null;
 		}
+		return new LatLng(location.getLatitude(), location.getLongitude());
+	}
 
-		LatLng latLng = CONVERTER.toLatLng(point.getRdX(), point.getRdY());
+	private void fetchAndDisplayDirections(LatLng from, LatLng to) {
+
 		String apiKey = getString(R.string.google_maps_key);
 		RequestQueue queue = Volley.newRequestQueue(getContext());
 		queue.add(new JsonObjectRequest(Request.Method.GET,
 				"https://maps.googleapis.com/maps/api/directions/json?" +
-						"origin=" + location.getLatitude() + "," + location.getLongitude() +
-						"&destination=" + latLng.latitude + "," + latLng.longitude +
+						"origin=" + from.latitude + "," + from.longitude +
+						"&destination=" + to.latitude + "," + to.longitude +
 						"&mode=driving" +
 						"&key=" + apiKey, null, response -> {
 			Log.w(TAG, "We got a response!");
@@ -202,6 +205,9 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 					Toast.makeText(getContext(), "Location granted!", Toast.LENGTH_SHORT).show();
 
 					googleMap.setMyLocationEnabled(true);
+					LatLng pos = fetchLastLocation();
+					if (pos != null)
+						googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 10));
 					googleMap.setOnMarkerClickListener(marker -> {
 						for (LmsPoint p : points) {
 							if (p.getLmsNumber() == (int) marker.getTag()) {
@@ -252,7 +258,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 				break;
 			}
 		}
-		fetchAndDisplayDirectionsTo(point);
+		fetchAndDisplayDirections(fetchLastLocation(), CONVERTER.toLatLng(point.getRdX(), point.getRdY()));
 	}
 
 	private static void startGeofencing(Context context, Collection<LmsPoint> points) {
