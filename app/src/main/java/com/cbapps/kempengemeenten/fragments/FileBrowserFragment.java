@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceDialogFragmentCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -157,6 +158,9 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 			handler.post(() -> {
 				this.path = result.getPath();
 				filePathEditText.setText(result.getPath());
+				((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(
+						result.isDirectory() ? getFileLocationPreference().isDirectoriesMode() :
+								getFileLocationPreference().isFilesMode());
 			});
 			browser.listFiles(result2 -> {
 				Log.i(TAG, "Done fetching files.");
@@ -172,9 +176,27 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 				});
 			}, (info, errorMessage) -> {
 				Log.e(TAG, "Could not list files: " + errorMessage);
+				handler.post(() -> {
+					fileBrowserRecyclerView.animate().alpha(1).start();
+					progressCircle.animate().alpha(0).setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							progressCircle.setVisibility(View.GONE);
+						}
+					}).start();
+				});
 			});
 		}, (info, errorMessage) -> {
 			Log.e(TAG, "Could not move into '" + fpath + "': " + errorMessage);
+			handler.post(() -> {
+				fileBrowserRecyclerView.animate().alpha(1).start();
+				progressCircle.animate().alpha(0).setListener(new AnimatorListenerAdapter() {
+					@Override
+					public void onAnimationEnd(Animator animation) {
+						progressCircle.setVisibility(View.GONE);
+					}
+				}).start();
+			});
 		});
 	}
 
