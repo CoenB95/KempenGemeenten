@@ -29,7 +29,7 @@
     <string name="location_upload_updates_ftp">Updatefile upload-directory</string>
     <string name="ftp_locations">FTP locations</string>
     <string name="ftp_credentials">FTP Credentials</string>
-    <string name="version_code" translatable="false">3.0 (beta 3)</string>
+    <string name="version_code" translatable="false">3.0</string>
     <string name="about">About</string>
     <string name="location">Location</string>
     <string name="measured">Measured</string>
