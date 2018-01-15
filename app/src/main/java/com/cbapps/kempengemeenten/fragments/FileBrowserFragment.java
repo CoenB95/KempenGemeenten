@@ -109,7 +109,7 @@ public class FileBrowserFragment extends PreferenceDialogFragmentCompat {
 
 	private void setBrowseMode() {
 		if (getFileLocationPreference().isFTPMode()) {
-			browser = new FTPFileBrowser(FTPFileConnection.getDefaultConnection());
+			browser = new FTPFileBrowser(FTPFileConnection.getDefaultConnection(getContext()));
 			if (isVisible()) moveAndList(null);
 		} else if (getFileLocationPreference().isLocalMode()) {
 			browser = new LocalFileBrowser();

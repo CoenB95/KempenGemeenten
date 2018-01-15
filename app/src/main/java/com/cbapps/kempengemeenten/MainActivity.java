@@ -52,9 +52,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 		setContentView(R.layout.main_layout);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		AndroidThreeTen.init(getBaseContext());
-		FTPFileConnection.setDefaultConnection("ftp.kempengemeenten.nl",
-				preferences.getString("ftpUsername", ""),
-				preferences.getString("ftpPassword", ""));
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);

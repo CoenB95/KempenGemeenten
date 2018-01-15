@@ -150,7 +150,7 @@ public class UploadCentreFragment extends DialogFragment {
 	}
 
 	private void startFTP() {
-		connection = FTPFileConnection.getDefaultConnection();
+		connection = FTPFileConnection.getDefaultConnection(getContext());
 		ftpFileBrowser = new FTPFileBrowser(connection);
 		transferer = new FTPFileTransferer(connection);
 		ExecutorService service = Executors.newCachedThreadPool();

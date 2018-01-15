@@ -1,5 +1,8 @@
 package com.cbapps.kempengemeenten;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.StringRes;
 import android.util.Log;
 
@@ -54,12 +57,11 @@ public class FTPFileConnection {
 		}
 	}
 
-	public static FTPFileConnection getDefaultConnection() {
-		return connection;
-	}
-
-	public static void setDefaultConnection(String hostName, String username, String password) {
-		connection = new FTPFileConnection(hostName, username, password);
+	public static FTPFileConnection getDefaultConnection(Context context) {
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+		return new FTPFileConnection("ftp.kempengemeenten.nl",
+				preferences.getString("ftpUsername", ""),
+				preferences.getString("ftpPassword", ""));
 	}
 
 	public FTPClient getClient() {
