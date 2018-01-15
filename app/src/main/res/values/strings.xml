@@ -55,5 +55,6 @@
     <string name="delete_after_upload_title">Delete photo\'s on success</string>
     <string name="delete_after_upload_description_off">Keep the original photo\'s safe on the device</string>
 	<string name="show_notifications">Notify nearby measuring point</string>
+    <string name="lma" translatable="false">LMA</string>
 
 </resources>
