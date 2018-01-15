@@ -71,7 +71,7 @@
 		android:title="@string/about">
 
         <Preference
-	        android:title="@string/app_name"
+	        android:title="@string/lma"
 	        android:summary="@string/copyright"/>
         <Preference
 			android:key="version_code"
