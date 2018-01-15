@@ -40,6 +40,10 @@
 			android:summaryOff="@string/delete_after_upload_description_off"
 			android:defaultValue="false"/>
 
+		<CheckBoxPreference
+			android:key="showNotifications"
+			android:title="@string/show_notifications"
+			android:defaultValue="true"/>
 	</PreferenceCategory>
 
     <PreferenceCategory

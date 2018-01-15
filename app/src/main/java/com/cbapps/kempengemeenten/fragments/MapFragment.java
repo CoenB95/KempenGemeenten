@@ -14,8 +14,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
@@ -77,11 +81,11 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 
 	public static final String TAG = "MapFragment";
 	public static final String EXTRA_SHOW_LMS_DETAIL = "show-lms-point-detail";
-	private static final String GEOFENCE_CHANNEL_ID = "geofence-channel";
+	public static final String GEOFENCE_CHANNEL_ID = "geofence-channel";
 	private static final CoordinateConverter CONVERTER = new RDToWGS84Converter();
 
 	/**The default geofencing radius in meters.*/
-	private static final int GEOFENCE_RADIUS = 500;
+	private static final int GEOFENCE_RADIUS = 100;
 	/**The expiration time of geofences in miliseconds.*/
 	private static final int GEOFENCE_EXPIRATION = 12 * 3600 * 1000;
 
@@ -128,17 +132,11 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 		if (context == null)
 			return;
 
+		if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("showNotifications", true))
+			return;
+
 		NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		if (manager != null) {
-			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-				NotificationChannel channel = new NotificationChannel(GEOFENCE_CHANNEL_ID,
-						context.getString(R.string.geofence_channel_name),
-						NotificationManager.IMPORTANCE_DEFAULT);
-				channel.setDescription(context.getString(R.string.geofence_channel_description));
-				channel.enableVibration(true);
-				manager.createNotificationChannel(channel);
-			}
-
 			Intent resultIntent = new Intent(context, MainActivity.class);
 			resultIntent.putExtra(EXTRA_SHOW_LMS_DETAIL, point);
 			TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
@@ -147,11 +145,14 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 			PendingIntent resultPendingIntent = stackBuilder
 					.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
+			Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
 			Notification notification = new NotificationCompat.Builder(context, GEOFENCE_CHANNEL_ID)
 					.setContentTitle(context.getString(R.string.geofence_notification_title))
 					.setContentText(context.getString(R.string.geofence_notification_summary))
 					.setContentIntent(resultPendingIntent)
 					.setSmallIcon(R.drawable.logo)
+					.setSound(alarmSound)
 					.build();
 			manager.notify(0, notification);
 		}

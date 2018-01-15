@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Kempengemeenten</string>
+    <string name="app_name" translatable="false">LMA</string>
     <string name="action_settings">Settings</string>
     <string name="password">Password</string>
     <string name="username">Username</string>
@@ -29,7 +29,7 @@
     <string name="location_upload_updates_ftp">Updatefile upload-directory</string>
     <string name="ftp_locations">FTP locations</string>
     <string name="ftp_credentials">FTP Credentials</string>
-    <string name="version_code" translatable="false">3.0 (beta 2)</string>
+    <string name="version_code" translatable="false">3.0 (beta 3)</string>
     <string name="about">About</string>
     <string name="location">Location</string>
     <string name="measured">Measured</string>
@@ -54,5 +54,6 @@
 	<string name="delete_after_upload_description_on">Delete photo\'s after uploading successfully</string>
     <string name="delete_after_upload_title">Delete photo\'s on success</string>
     <string name="delete_after_upload_description_off">Keep the original photo\'s safe on the device</string>
+	<string name="show_notifications">Notify nearby measuring point</string>
 
 </resources>

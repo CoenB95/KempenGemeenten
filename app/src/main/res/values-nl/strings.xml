@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Kempengemeenten</string>
-    <string name="action_settings">Instellingen</string>
+	<string name="action_settings">Instellingen</string>
     <string name="cancel">Annuleren</string>
     <string name="description">Afbeelding</string>
     <string name="username">Gebruikersnaam</string>
@@ -51,4 +50,5 @@
 	<string name="delete_after_upload_description_on">Verwijder foto\'s na succesvol geüpload te zijn</string>
     <string name="delete_after_upload_title">Verwijder foto\'s bij succes</string>
     <string name="delete_after_upload_description_off">Behoud de orginele foto\'s veilig op het apparaat</string>
+	<string name="show_notifications">Notificeer wanneer dichtbij meetpunt</string>
 </resources>

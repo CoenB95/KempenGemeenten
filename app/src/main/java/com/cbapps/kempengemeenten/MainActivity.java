@@ -1,6 +1,9 @@
 package com.cbapps.kempengemeenten;
 
 import android.annotation.TargetApi;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -100,14 +103,22 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			uploadCentreFragment = new UploadCentreFragment();
 		}
 
-//		shownLmsPoint = (LmsPoint) getIntent().getSerializableExtra(MapFragment.EXTRA_SHOW_LMS_DETAIL);
-//		if (shownLmsPoint != null)
-//			mapFragment.showLmsDetail(shownLmsPoint);
-//		else if (savedInstanceState != null) {
-//			shownLmsPoint = (LmsPoint) savedInstanceState.getSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL);
-//			if (shownLmsPoint != null)
-//				mapFragment.showLmsDetail(shownLmsPoint);
-//		}
+		if (preferences.getBoolean("firstRun", true)) {
+			NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			if (manager != null) {
+				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+					NotificationChannel channel = new NotificationChannel(MapFragment.GEOFENCE_CHANNEL_ID,
+							getString(R.string.geofence_channel_name),
+							NotificationManager.IMPORTANCE_DEFAULT);
+					channel.setDescription(getString(R.string.geofence_channel_description));
+					channel.enableVibration(true);
+					manager.createNotificationChannel(channel);
+				}
+			}
+			preferences.edit()
+					.putBoolean("firstRun", false).
+					apply();
+		}
 	}
 
 	private void setMainFragment(Fragment fragment, String tag, boolean backStack) {
