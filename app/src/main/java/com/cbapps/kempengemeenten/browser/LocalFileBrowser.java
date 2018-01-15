@@ -1,4 +1,7 @@
-package com.cbapps.kempengemeenten;
+package com.cbapps.kempengemeenten.browser;
+
+import com.cbapps.kempengemeenten.files.DefaultFileInfo;
+import com.cbapps.kempengemeenten.files.FileInfo;
 
 import java.io.File;
 import java.util.ArrayList;

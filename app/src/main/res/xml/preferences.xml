@@ -5,14 +5,14 @@
     <PreferenceCategory
 		android:title="@string/ftp_locations">
 
-        <com.cbapps.kempengemeenten.LocationPreference
+        <com.cbapps.kempengemeenten.settings.LocationPreference
 	        android:dialogTitle="@string/location_download_updates_ftp"
 			android:key="ftpDownloadLocation"
 			android:positiveButtonText="@string/save"
 			android:negativeButtonText="@string/cancel"
 			android:title="@string/location_download_updates_ftp"
 			browseMode="ftpFiles"/>
-        <com.cbapps.kempengemeenten.LocationPreference
+        <com.cbapps.kempengemeenten.settings.LocationPreference
 	        android:dialogTitle="@string/location_upload_photos_ftp"
 	        android:key="ftpUploadLocation"
 	        android:positiveButtonText="@string/save"
@@ -25,7 +25,7 @@
 	<PreferenceCategory
 		android:title="@string/local_locations">
 
-		<com.cbapps.kempengemeenten.LocationPreference
+		<com.cbapps.kempengemeenten.settings.LocationPreference
 			android:dialogTitle="@string/location_upload_photos_ftp"
 			android:key="localUploadLocation"
 			android:positiveButtonText="@string/save"

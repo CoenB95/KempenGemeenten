@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten;
+package com.cbapps.kempengemeenten.util;
 
 import android.app.Activity;
 import android.content.Context;

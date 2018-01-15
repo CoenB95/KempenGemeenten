@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten;
+package com.cbapps.kempengemeenten.util;
 
 import com.google.android.gms.maps.model.LatLng;
 

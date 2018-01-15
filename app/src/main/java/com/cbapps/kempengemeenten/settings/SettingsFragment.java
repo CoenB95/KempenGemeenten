@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.cbapps.kempengemeenten;
+package com.cbapps.kempengemeenten.settings;
 
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -21,6 +21,7 @@ import android.support.v7.preference.PreferenceFragmentCompat;
 
 import com.cb.kempengemeenten.R;
 import com.cbapps.kempengemeenten.fragments.FileBrowserFragment;
+import com.cbapps.kempengemeenten.settings.LocationPreference;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
 

@@ -1,24 +1,13 @@
 package com.cbapps.kempengemeenten;
 
-import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
 
-import com.cb.kempengemeenten.R;
 import com.cbapps.kempengemeenten.database.LmsDatabase;
 import com.cbapps.kempengemeenten.database.LmsPoint;
-import com.cbapps.kempengemeenten.fragments.MapFragment;
+import com.cbapps.kempengemeenten.util.OreoNotificationManager;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingEvent;

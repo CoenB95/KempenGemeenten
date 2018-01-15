@@ -1,10 +1,11 @@
-package com.cbapps.kempengemeenten;
+package com.cbapps.kempengemeenten.browser;
 
 import android.support.annotation.StringRes;
 
 import com.cbapps.kempengemeenten.callback.OnErrorListener;
 import com.cbapps.kempengemeenten.callback.OnProgressUpdateListener;
 import com.cbapps.kempengemeenten.callback.OnSuccessListener;
+import com.cbapps.kempengemeenten.files.FileInfo;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

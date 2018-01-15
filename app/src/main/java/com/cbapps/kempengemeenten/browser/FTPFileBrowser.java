@@ -1,9 +1,12 @@
-package com.cbapps.kempengemeenten;
+package com.cbapps.kempengemeenten.browser;
 
 import android.support.annotation.StringRes;
 import android.util.Log;
 
 import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.ftp.FTPFileConnection;
+import com.cbapps.kempengemeenten.files.FTPFileInfo;
+import com.cbapps.kempengemeenten.files.FileInfo;
 
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.ftp.FTPFile;

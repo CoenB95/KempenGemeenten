@@ -1,5 +1,6 @@
-package com.cbapps.kempengemeenten;
+package com.cbapps.kempengemeenten.util;
 
+import com.cbapps.kempengemeenten.util.CoordinateConverter;
 import com.google.android.gms.maps.model.LatLng;
 
 /**

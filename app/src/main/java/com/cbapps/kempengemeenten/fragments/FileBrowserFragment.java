@@ -19,13 +19,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.cb.kempengemeenten.R;
-import com.cbapps.kempengemeenten.LocationPreference;
-import com.cbapps.kempengemeenten.FTPFileBrowser;
-import com.cbapps.kempengemeenten.FTPFileConnection;
-import com.cbapps.kempengemeenten.FileBrowser;
+import com.cbapps.kempengemeenten.settings.LocationPreference;
+import com.cbapps.kempengemeenten.browser.FTPFileBrowser;
+import com.cbapps.kempengemeenten.ftp.FTPFileConnection;
+import com.cbapps.kempengemeenten.browser.FileBrowser;
 import com.cbapps.kempengemeenten.FileBrowserAdapter;
-import com.cbapps.kempengemeenten.LocalFileBrowser;
-import com.cbapps.kempengemeenten.PermissionManager;
+import com.cbapps.kempengemeenten.browser.LocalFileBrowser;
+import com.cbapps.kempengemeenten.util.PermissionManager;
 
 /**
  * @author CoenB95

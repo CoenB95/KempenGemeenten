@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten;
+package com.cbapps.kempengemeenten.util;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.MainActivity;
 import com.cbapps.kempengemeenten.database.LmsPoint;
 
 /**

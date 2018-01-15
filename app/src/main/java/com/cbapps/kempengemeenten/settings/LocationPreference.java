@@ -1,4 +1,4 @@
-package com.cbapps.kempengemeenten;
+package com.cbapps.kempengemeenten.settings;
 
 import android.annotation.TargetApi;
 import android.content.Context;

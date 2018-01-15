@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.cb.kempengemeenten.R;
 import com.cbapps.kempengemeenten.callback.Predicate;
+import com.cbapps.kempengemeenten.files.FileInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
