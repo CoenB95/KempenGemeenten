@@ -62,7 +62,6 @@
 			android:inputType="textPassword"
 			android:key="ftpPassword"
 			android:negativeButtonText="@string/cancel"
-			android:password="true"
 			android:positiveButtonText="@string/save"
 			android:title="@string/password" />
     </PreferenceCategory>

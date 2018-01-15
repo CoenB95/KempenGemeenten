@@ -238,7 +238,7 @@ public class UploadCentreFragment extends DialogFragment {
 				Predicate<FileInfo> filter = f ->
 						!f.getName().startsWith(".");
 
-				adapter.setAllFiles(result1, filter, true);
+				adapter.setAllFiles(result1, filter, true, FileBrowserAdapter.FILE_TYPE_UPLOAD);
 				StringBuilder builder = new StringBuilder("The following files are in the directory:");
 				for (FileInfo info : result1)
 					builder.append('\n').append(info.getName())

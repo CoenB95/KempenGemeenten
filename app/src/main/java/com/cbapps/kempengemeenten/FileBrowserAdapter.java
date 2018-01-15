@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -22,6 +23,10 @@ import java.util.List;
  */
 
 public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.FileViewHolder> {
+
+	public static final int FILE_TYPE_DOWNLOAD = R.drawable.ic_cloud_download_black_24dp;
+	public static final int FILE_TYPE_UPLOAD = R.drawable.ic_cloud_upload_black_24dp;
+	public static final int FILE_TYPE_FOLDER = R.drawable.ic_folder;
 
 	private List<FileItem> fileInfos;
 	private OnFileSelectedListener listener;
@@ -82,18 +87,37 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 	public void setAllFiles(Collection<FileInfo> infos, boolean enableProgress) {
 		setAllFiles(infos, f -> true, enableProgress);
 	}
+
 	public void setAllFiles(Collection<FileInfo> infos, Predicate<FileInfo> filter, boolean enableProgress) {
+		setAllFiles(infos, filter, enableProgress, FILE_TYPE_FOLDER);
+	}
+
+	public void setAllFiles(Collection<FileInfo> infos, Predicate<FileInfo> filter, boolean enableProgress, int fileType) {
 		handler.post(() -> {
 			fileInfos.clear();
 			for (FileInfo info : infos) {
 				if (filter.test(info)) {
 					FileItem item = new FileItem(info);
 					item.enableProgress(enableProgress);
+					item.setFileType(fileType);
 					fileInfos.add(item);
 				}
 			}
 			Collections.sort(fileInfos);
 			notifyDataSetChanged();
+		});
+	}
+
+	public void setFileType(FileInfo info, int type) {
+		handler.post(() -> {
+			for (int i = 0; i < fileInfos.size(); i++) {
+				FileItem item = fileInfos.get(i);
+				if (item.info.equals(info)) {
+					item.setFileType(type);
+					notifyItemChanged(i);
+					break;
+				}
+			}
 		});
 	}
 
@@ -116,7 +140,7 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 
 	@Override
 	public FileViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.file_list_item, parent, false);
+		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.file_progress_list_item, parent, false);
 		return new FileViewHolder(view);
 	}
 
@@ -133,12 +157,14 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 	public class FileViewHolder extends RecyclerView.ViewHolder {
 
 		private FileItem item;
+		private ImageView fileTypeImageView;
 		private TextView fileNameTextView;
 		private TextView progressTextView;
 		private ProgressBar progressBar;
 
 		public FileViewHolder(View itemView) {
 			super(itemView);
+			fileTypeImageView = itemView.findViewById(R.id.fileTypeImageView);
 			fileNameTextView = itemView.findViewById(R.id.fileNameTextView);
 			progressTextView = itemView.findViewById(R.id.progressTextView);
 			progressBar = itemView.findViewById(R.id.progressBar);
@@ -150,9 +176,18 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 
 		public void setFile(FileItem item) {
 			this.item = item;
+			if (item.fileType == FILE_TYPE_FOLDER) {
+				if (item.info.isDirectory())
+					fileTypeImageView.setImageResource(item.fileType);
+				else
+					fileTypeImageView.setImageDrawable(null);
+			} else {
+				fileTypeImageView.setImageResource(item.fileType);
+			}
 			fileNameTextView.setText(item.info.getName());
-			progressBar.setVisibility(item.progressEnabled ? View.VISIBLE : View.INVISIBLE);
+			progressBar.setVisibility(item.progressEnabled ? View.VISIBLE : View.GONE);
 			progressBar.setProgress((int) (item.progress * 100));
+			progressTextView.setVisibility(item.progressEnabled ? View.VISIBLE : View.GONE);
 			progressTextView.setText(String.format("%.0f%%", Math.floor(item.progress * 100)));
 		}
 	}
@@ -163,6 +198,7 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 
 	private static class FileItem implements Comparable<FileItem> {
 		private FileInfo info;
+		private int fileType;
 		private double progress;
 		private boolean progressEnabled;
 
@@ -176,6 +212,10 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 
 		public void setProgress(double progress) {
 			this.progress = progress;
+		}
+
+		public void setFileType(int fileType) {
+			this.fileType = fileType;
 		}
 
 		@Override
