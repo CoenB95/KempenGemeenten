@@ -24,7 +24,10 @@ public interface LmsDao {
 	List<LmsPoint> getAll();
 
 	@Query("SELECT * FROM lmspoint WHERE lmsNumber LIKE :id LIMIT 1")
-	LiveData<LmsPoint> findByLmsNumber(int id);
+	LmsPoint findByLmsNumber(int id);
+
+	@Query("SELECT * FROM lmspoint WHERE lmsNumber LIKE :id LIMIT 1")
+	LiveData<LmsPoint> findLiveByLmsNumber(int id);
 
 	@Insert
 	void insertAll(LmsPoint... users);

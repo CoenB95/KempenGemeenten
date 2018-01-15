@@ -1,44 +1,46 @@
 package com.cbapps.kempengemeenten;
 
-import android.annotation.TargetApi;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.Build;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.cb.kempengemeenten.R;
+import com.cbapps.kempengemeenten.callback.OnMapActionListener;
 import com.cbapps.kempengemeenten.database.LmsPoint;
-import com.cbapps.kempengemeenten.fragments.LmsDetailFragment;
 import com.cbapps.kempengemeenten.fragments.MapFragment;
 import com.cbapps.kempengemeenten.fragments.UploadCentreFragment;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
-public class MainActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener,
-		MapFragment.OnLmsPointSelectedListener {
+public class MainActivity extends AppCompatActivity implements
+		FragmentManager.OnBackStackChangedListener, OnMapActionListener {
 
 	private static final String TAG = "MainActivity";
 
-	private UploadCentreFragment uploadCentreFragment;
+	private MapFragment mapFragment;
+	private UploadCentreFragment uploadFragment;
 
 	private SharedPreferences preferences;
 
@@ -51,10 +53,25 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_layout);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
 		AndroidThreeTen.init(getBaseContext());
+		OreoNotificationManager.init(this);
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+
+		mapFragment = (MapFragment) getSupportFragmentManager().findFragmentByTag("Map");
+		uploadFragment = (UploadCentreFragment) getSupportFragmentManager().findFragmentByTag("UploadCentre");
+
+		if (mapFragment == null) {
+			mapFragment = new MapFragment();
+		}
+
+		if (uploadFragment == null) {
+			uploadFragment = new UploadCentreFragment();
+		}
+
+		mapFragment.setOnMapActionListener(this);
 
 		drawerLayout = findViewById(R.id.drawer);
 		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
@@ -66,12 +83,11 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 			drawerLayout.closeDrawers();
 			switch (item.getItemId()) {
 				case R.id.map:
-					MapFragment mapFragment = new MapFragment();
-					mapFragment.setLmsPointSelectedListener(this);
+					//MapFragment newMapFragment = new MapFragment();
 					setMainFragment(mapFragment, "Map", false);
 					return true;
 				case R.id.home:
-					setMainFragment(uploadCentreFragment, "UploadCentre", true);
+					setMainFragment(uploadFragment, "UploadCentre", true);
 					return true;
 			}
 			return false;
@@ -83,38 +99,17 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
 		PermissionManager.setup();
 
-		MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentByTag("Map");
-		uploadCentreFragment = (UploadCentreFragment) getSupportFragmentManager().findFragmentByTag("UploadCentre");
-
-		if (mapFragment == null) {
-			mapFragment = new MapFragment();
-			mapFragment.setLmsPointSelectedListener(this);
+		if (savedInstanceState == null) {
 			navigationView.setCheckedItem(R.id.map);
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.content, mapFragment, "Map")
 					.commit();
-		}
-
-		if (uploadCentreFragment == null) {
-			uploadCentreFragment = new UploadCentreFragment();
-		}
-
-		if (preferences.getBoolean("firstRun", true)) {
-			NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			if (manager != null) {
-				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-					NotificationChannel channel = new NotificationChannel(MapFragment.GEOFENCE_CHANNEL_ID,
-							getString(R.string.geofence_channel_name),
-							NotificationManager.IMPORTANCE_DEFAULT);
-					channel.setDescription(getString(R.string.geofence_channel_description));
-					channel.enableVibration(true);
-					manager.createNotificationChannel(channel);
-				}
-			}
-			preferences.edit()
-					.putBoolean("firstRun", false).
-					apply();
+		} else {
+			LmsPoint nearbyGeofence = (LmsPoint) savedInstanceState.getSerializable(
+					OreoNotificationManager.NEARBY_LMS_POINT);
+			if (nearbyGeofence != null)
+				mapFragment.showLmsDetail(nearbyGeofence, false);
 		}
 	}
 
@@ -126,14 +121,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 		if (backStack)
 			ft.addToBackStack("main-backstack");
 		ft.commit();
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == LmsDetailFragment.CAPTURE_REQUEST_CODE) {
-			Log.d(TAG, "And now...");
-		}
 	}
 
 	@Override
@@ -204,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	@Override
 	protected void onResume() {
 		super.onResume();
+		onBackStackChanged();
 		getSupportFragmentManager().addOnBackStackChangedListener(this);
 	}
 
@@ -223,19 +211,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 	}
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		//outState.putSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL, shownLmsPoint);
-	}
-
-	@Override
 	public void onLmsPointSelected(LmsPoint point) {
-//		shownLmsPoint = point;
-//		if (point == null) {
-//			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-//		} else {
-//			bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-//			detailFragment.showDetail(point);
-//		}
+
 	}
 }

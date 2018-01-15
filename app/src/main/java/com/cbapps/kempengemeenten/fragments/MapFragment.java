@@ -2,59 +2,45 @@ package com.cbapps.kempengemeenten.fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.AudioAttributes;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.cb.kempengemeenten.R;
-import com.cbapps.kempengemeenten.MainActivity;
 import com.cbapps.kempengemeenten.CoordinateConverter;
+import com.cbapps.kempengemeenten.GeofenceTransitionListener;
+import com.cbapps.kempengemeenten.callback.OnMapActionListener;
 import com.cbapps.kempengemeenten.database.LmsDatabase;
 import com.cbapps.kempengemeenten.database.LmsPoint;
 import com.cbapps.kempengemeenten.PermissionManager;
 import com.cbapps.kempengemeenten.RDToWGS84Converter;
 import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingClient;
-import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -81,7 +67,6 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 
 	public static final String TAG = "MapFragment";
 	public static final String EXTRA_SHOW_LMS_DETAIL = "show-lms-point-detail";
-	public static final String GEOFENCE_CHANNEL_ID = "geofence-channel";
 	private static final CoordinateConverter CONVERTER = new RDToWGS84Converter();
 
 	/**The default geofencing radius in meters.*/
@@ -94,14 +79,13 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 	private GoogleMap googleMap;
 	private List<Marker> markers;
 	private LiveData<LmsPoint> observedPoint;
-	private Observer<LmsPoint> markerClickObserver;
 	private BottomSheetBehavior bottomSheetBehavior;
 	private LmsDetailFragment detailFragment;
 
 	private LmsPoint shownPoint;
 	private List<Polyline> shownPolyLine;
 
-	private OnLmsPointSelectedListener listener;
+	private OnMapActionListener listener;
 
 	public MapFragment() {
 		service = Executors.newCachedThreadPool();
@@ -125,36 +109,6 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 					.snippet(point.getTown()));
 			marker.setTag(point.getLmsNumber());
 			markers.add(marker);
-		}
-	}
-
-	private static void createNotification(Context context, LmsPoint point) {
-		if (context == null)
-			return;
-
-		if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("showNotifications", true))
-			return;
-
-		NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		if (manager != null) {
-			Intent resultIntent = new Intent(context, MainActivity.class);
-			resultIntent.putExtra(EXTRA_SHOW_LMS_DETAIL, point);
-			TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-			stackBuilder.addParentStack(MainActivity.class);
-			stackBuilder.addNextIntent(resultIntent);
-			PendingIntent resultPendingIntent = stackBuilder
-					.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-			Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
-			Notification notification = new NotificationCompat.Builder(context, GEOFENCE_CHANNEL_ID)
-					.setContentTitle(context.getString(R.string.geofence_notification_title))
-					.setContentText(context.getString(R.string.geofence_notification_summary))
-					.setContentIntent(resultPendingIntent)
-					.setSmallIcon(R.drawable.logo)
-					.setSound(alarmSound)
-					.build();
-			manager.notify(0, notification);
 		}
 	}
 
@@ -249,7 +203,7 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 
 		bottomSheetBehavior = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet));
 		bottomSheetBehavior.setHideable(true);
-		bottomSheetBehavior.setPeekHeight(300);
+		bottomSheetBehavior.setPeekHeight(BottomSheetBehavior.PEEK_HEIGHT_AUTO);
 		bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
 		if (bundle != null) {
@@ -264,20 +218,21 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
 		this.googleMap = googleMap;
-		markerClickObserver = marker -> showLmsDetail(marker, true);
+		Observer<LmsPoint> observer = marker -> showLmsDetail(marker, true);
 
 		googleMap.setOnMarkerClickListener(marker -> {
 			if (observedPoint != null)
-				observedPoint.removeObserver(markerClickObserver);
-			observedPoint = LmsDatabase.newInstance(getContext()).lmsDao().findByLmsNumber((int) marker.getTag());
-			observedPoint.observe(this, markerClickObserver);
+				observedPoint.removeObserver(observer);
+			observedPoint = LmsDatabase.newInstance(getContext()).lmsDao()
+					.findLiveByLmsNumber((int) marker.getTag());
+			observedPoint.observe(this, observer);
 			return false;
 		});
 
 		googleMap.setOnMapClickListener(latLng -> {
 			handler.post(() -> {
 				if (observedPoint != null)
-					observedPoint.removeObserver(markerClickObserver);
+					observedPoint.removeObserver(observer);
 				observedPoint = null;
 				showLmsDetail(null, false);
 			});
@@ -287,8 +242,13 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 			List<LmsPoint> lmsPoints = LmsDatabase.newInstance(getContext()).lmsDao().getAll();
 			handler.post(() -> {
 				createLmsMarkers(googleMap, lmsPoints);
-				if (shownPoint != null)
+				if (shownPoint == null) {
+					LatLng pos = fetchLastLocation();
+					if (pos != null)
+						googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 10));
+				} else {
 					showLmsDetail(shownPoint, false);
+				}
 				startGeofencing(getContext(), lmsPoints);
 			});
 		});
@@ -313,7 +273,7 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 		outState.putSerializable(MapFragment.EXTRA_SHOW_LMS_DETAIL, shownPoint);
 	}
 
-	public void setLmsPointSelectedListener(OnLmsPointSelectedListener listener) {
+	public void setOnMapActionListener(OnMapActionListener listener) {
 		this.listener = listener;
 	}
 
@@ -376,12 +336,12 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 		if (fences.isEmpty())
 			return;
 
-		Intent intent = new Intent(context, GeofenceTransitionBroadcastReceiver.class);
+		Intent intent = new Intent(context, GeofenceTransitionListener.class);
 		geofencingClient.addGeofences(new GeofencingRequest.Builder()
 				.addGeofences(fences)
 				.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-				.build(), PendingIntent.getBroadcast(context, 0, intent,
-				PendingIntent.FLAG_UPDATE_CURRENT))
+				.build(),
+				PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
 				.addOnFailureListener(runnable -> {
 					new AlertDialog.Builder(context)
 							.setTitle(R.string.google_location_required_title)
@@ -392,46 +352,5 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 							.setNegativeButton(R.string.cancel, null)
 							.show();
 				});
-	}
-
-	public static class GeofenceTransitionBroadcastReceiver extends BroadcastReceiver {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-			if (geofencingEvent.hasError()) {
-				String errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode());
-				new AlertDialog.Builder(context)
-						.setTitle("Error")
-						.setMessage(errorMessage)
-						.show();
-				return;
-			}
-
-			// Get the transition type.
-			int geofenceTransition = geofencingEvent.getGeofenceTransition();
-
-			// Test that the reported transition was of interest.
-			if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-
-				// Get the geofences that were triggered. A single event can trigger
-				// multiple geofences.
-				List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-				if (service == null)
-					return;
-				service.submit(() -> {
-					for (Geofence fence : triggeringGeofences) {
-						LmsPoint p = LmsDatabase.newInstance(context).lmsDao()
-								.findByLmsNumber(Integer.parseInt(fence.getRequestId())).getValue();
-
-						createNotification(context, p);
-					}
-				});
-			}
-		}
-	}
-
-	public interface OnLmsPointSelectedListener {
-		void onLmsPointSelected(LmsPoint point);
 	}
 }

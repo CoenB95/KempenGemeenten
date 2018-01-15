@@ -39,8 +39,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <receiver
-            android:name="com.cbapps.kempengemeenten.fragments.MapFragment$GeofenceTransitionBroadcastReceiver"/>
+        <receiver android:name="com.cbapps.kempengemeenten.GeofenceTransitionListener"/>
 
     </application>
 
