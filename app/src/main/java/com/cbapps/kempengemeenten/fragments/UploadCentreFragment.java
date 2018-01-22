@@ -188,7 +188,7 @@ public class UploadCentreFragment extends DialogFragment {
 										while ((line = reader.readLine()) != null) {
 											line = line.replace("\"", "");
 											String[] split = line.split(";", -1);
-											if (split.length < 8)
+											if (split.length < 7)
 												continue;
 											LmsPoint point = new LmsPoint(
 													Integer.valueOf(split[0]), //lms
@@ -198,9 +198,10 @@ public class UploadCentreFragment extends DialogFragment {
 													split[4], //street
 													Integer.valueOf(split[5]), //number
 													split[6], //appendix
-													split[7], //measured-date
-													split[8].isEmpty() ? 0 : Integer.valueOf(split[8]), //measuring duration
-													split[9]); //photos json-array
+													//update-fields, not required when reading.
+													null, //measured-date
+													0, //measuring duration
+													null); //photos json-array
 											points.add(point);
 										}
 
