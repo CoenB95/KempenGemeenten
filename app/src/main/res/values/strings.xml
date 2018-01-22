@@ -41,7 +41,7 @@
     <string name="location_not_set_description">One or more location preferences are not yet set. Please set them using the Settings menu item.</string>
 	<string name="local_locations">Local locations</string>
 	<string name="updatefile_succeeded">Successfully updated measuring points</string>
-    <string name="updatefile_csv_wrong">Error: the updatefile contained unexpected data</string>
+    <string name="updatefile_csv_wrong">Some points may be missing as one or more points weren\'t formatted well in the updatefile</string>
     <string name="updatefile_error">Error while fetching updatefile</string>
     <string name="error_ftp_connection_closed">FTP connection closed</string>
     <string name="error_ftp_credentials_wrong">Username or password incorrect</string>

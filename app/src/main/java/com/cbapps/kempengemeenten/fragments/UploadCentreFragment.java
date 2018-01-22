@@ -185,32 +185,37 @@ public class UploadCentreFragment extends DialogFragment {
 									try {
 										BufferedReader reader = new BufferedReader(new FileReader(localFile.getPath()));
 										String line;
+										boolean parsedAllLines = true;
 										while ((line = reader.readLine()) != null) {
-											line = line.replace("\"", "");
-											String[] split = line.split(";", -1);
-											if (split.length < 7)
-												continue;
-											LmsPoint point = new LmsPoint(
-													Integer.valueOf(split[0]), //lms
-													Integer.valueOf(split[1]), //x
-													Integer.valueOf(split[2]), //y
-													split[3], //town
-													split[4], //street
-													Integer.valueOf(split[5]), //number
-													split[6], //appendix
-													//update-fields, not required when reading.
-													null, //measured-date
-													0, //measuring duration
-													null); //photos json-array
-											points.add(point);
+											try {
+												line = line.replace("\"", "");
+												String[] split = line.split(";", -1);
+												if (split.length < 7)
+													continue;
+												LmsPoint point = new LmsPoint(
+														Integer.valueOf(split[0]), //lms
+														Integer.valueOf(split[1]), //x
+														Integer.valueOf(split[2]), //y
+														split[3], //town
+														split[4], //street
+														Integer.valueOf(split[5]), //number
+														split[6], //appendix
+														//update-fields, not required when reading.
+														null, //measured-date
+														0, //measuring duration
+														null); //photos json-array
+												points.add(point);
+											} catch (NumberFormatException e) {
+												Log.e(TAG, "Could not parse csv.");
+												parsedAllLines = false;
+											}
 										}
 
 										LmsDatabase.newInstance(getContext()).lmsDao().insertOrReplaceAll(points);
-										setStatus(R.string.updatefile_succeeded);
-									} catch (NumberFormatException e) {
-										Log.e(TAG, "Could not parse csv.");
-										setStatus(R.string.updatefile_csv_wrong);
+										setStatus(parsedAllLines ? R.string.updatefile_succeeded :
+												R.string.updatefile_csv_wrong);
 									} catch (FileNotFoundException e) {
+										setStatus(R.string.error_file_not_found);
 										e.printStackTrace();
 									} catch (IOException e) {
 										e.printStackTrace();
