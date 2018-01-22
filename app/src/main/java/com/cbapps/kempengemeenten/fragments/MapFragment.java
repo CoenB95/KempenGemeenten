@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -201,9 +202,11 @@ public class MapFragment extends DialogFragment implements OnMapReadyCallback {
 				.replace(R.id.bottom_sheet_frame, detailFragment, "Detail")
 				.commit();
 
+		DisplayMetrics metrics = getResources().getDisplayMetrics();
+
 		bottomSheetBehavior = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet));
 		bottomSheetBehavior.setHideable(true);
-		bottomSheetBehavior.setPeekHeight(BottomSheetBehavior.PEEK_HEIGHT_AUTO);
+		bottomSheetBehavior.setPeekHeight((int) (90 * metrics.density));
 		bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
 		if (bundle != null) {
